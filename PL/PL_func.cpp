@@ -32,11 +32,18 @@ struct Objects* fill_structures(FILE* text)
 	for (int i = 0; i < NUMBER_OF_VARIABLES; i++)
 		variables_names[i] = new char[MAX_NAME_SIZE] {0};
 
+	int number_of_lines = 0;
 
 	for (int i = 0; buffer[i] != '\0'; i++)
 	{
 		if (isspace(buffer[i]))
 			continue;
+		else if (buffer[i] == ';')
+		{
+			obj[obj_counter].type_of_object = END_OF_LINE;
+			obj[obj_counter++].value = END_OF_LINE_VAL;
+			number_of_lines++;
+		}
 		else if (buffer[i] == ')')
 		{
 			obj[obj_counter].type_of_object = BRACKET;
@@ -186,6 +193,7 @@ struct Objects* fill_structures(FILE* text)
 	for (int i = 0; i < NUMBER_OF_VARIABLES; i++)
 		objs->variables_names[i] = variables_names[i];
 
+	objs->number_of_lines = number_of_lines;
 	return objs;
 }
 
@@ -213,13 +221,14 @@ void print_objects(Objects* object)
 		case FUNCTION:
 			printf("%d. type is FUNCTION, value is %d\n", i, object->obj[i].value);
 			break;
+		case END_OF_LINE:
+			printf("%d. type is END OF LINE, value is %d\n", i, object->obj[i].value);
+			break;
 		default:
 			printf("UNINDENTIFIED TYPE\n");
 			break;
 		}
 	}
-
-
 
 	return;
 }

@@ -9,6 +9,9 @@ bool is_free_objs = false;
 #define IS_FUNCTION(root)                                       \
     (root->get_data_type() == FUNCTION)
 
+#define IS_END_OF_LINE(root)                                    \
+    (root->get_data_type() == END_OF_LINE)
+
 #define IS_NUMBER(root)                                         \
     (root->get_data_type() == NUMBER)
 
@@ -23,6 +26,9 @@ bool is_free_objs = false;
 
 #define IS_DEL(root)                                            \
     ( (root->get_data_type() == OPERATOR) && (root->get_data_value() == OP_DEL_VAL) )
+
+#define IS_PLUS_OR_MIN()                                    \
+    (objs_->obj[cur_size_].type_of_object == OPERATOR) && ((objs_->obj[cur_size_].value == OP_MIN_VAL) || (objs_->obj[cur_size_].value == OP_PLUS_VAL))
 
 #define L_AND_R_NULL(root)                                      \
     ( (root->get_left() == nullptr) && (root->get_right() == nullptr) )
@@ -128,7 +134,24 @@ bool is_free_objs = false;
         strcat(buffer, "\\left(");                                                                                  \
         print_subtree(Rroot(start_root), buffer);                                                                   \
         strcat(buffer, "\\right)");                                                                                 \
-    }                                                                               
+    }
+
+int tree::count_num_of_lines(tree_element* start_root)
+{
+    int counter = 0;
+    if (IS_END_OF_LINE(start_root))
+        counter++;
+    if (Lroot(start_root))
+    {
+        counter += count_num_of_lines(Lroot(start_root));
+    }
+    if (Rroot(start_root))
+    {
+        counter += count_num_of_lines(Rroot(start_root));
+    }
+
+    return counter;
+}
 
 char* tree::make_assem_text()
 {
@@ -187,6 +210,14 @@ void tree::get_asm_text(tree_element* start_root,char* buffer)
             return;
             break;
         }
+        case FUNCTION:
+            printf("Still need to add case FUNCTION in get_asm_text");
+            break;
+        case END_OF_LINE: // Вообще в дереве не должно быть ";"
+            printf("Still need to add case FUNCTION in get_asm_text");
+            break;
+        default:
+            PRINT_UNDEFINE_TYPE;
     }
 }
 
@@ -1857,23 +1888,60 @@ void print_all_elements_beauty(tree_element* tmp, FILE* dump, struct Objects* ob
     {
         if (tmp->get_prev() == nullptr)
         {
-            if (tmp->get_data()->type_of_object != NUMBER)
+            if ((tmp->get_data()->type_of_object != NUMBER) && (tmp->get_data()->type_of_object != BINDER))
                 fprintf(dump, "\"%p\" [label = \"%s\",style = filled, fillcolor = red] \n", tmp, get_value_of_object(objs, tmp->get_data()));
             else
-                fprintf(dump, "\"%p\" [label = \"%d\",style = filled, fillcolor = red] \n", tmp, tmp->get_data()->value);
+            {
+                if (tmp->get_data()->type_of_object == BINDER)
+                    fprintf(dump, "\"%p\" [label = \"%d\",style = filled, fillcolor = \"#1F85DE\"] \n", tmp, tmp->get_data()->value);
+                else
+                    fprintf(dump, "\"%p\" [label = \"%d\",style = filled, fillcolor = red] \n", tmp, tmp->get_data()->value);
+            }
         }
         else
         {
             if ((tmp->get_data()->type_of_object == OPERATOR) && (tmp->get_data()->value == OP_TIMES_VAL))
                 fprintf(dump, "\"%p\" [label = \"%s\",style = filled, fillcolor = lightblue] \n", tmp, get_value_of_object(objs, tmp->get_data()));
-            else if (tmp->get_data()->type_of_object != NUMBER)
+            else if ((tmp->get_data()->type_of_object != NUMBER) && (tmp->get_data()->type_of_object != BINDER))
                 fprintf(dump, "\"%p\" [label = \"%s\",style = filled, fillcolor = purple] \n", tmp, get_value_of_object(objs, tmp->get_data()));
             else
-                fprintf(dump, "\"%p\" [label = \"%d\",style = filled, fillcolor = purple] \n", tmp, tmp->get_data()->value);
+            {
+                if (tmp->get_data()->type_of_object == BINDER)
+                    fprintf(dump, "\"%p\" [label = \"%d\",style = filled, fillcolor = \"#1F85DE\"] \n", tmp, tmp->get_data()->value);
+                else
+                    fprintf(dump, "\"%p\" [label = \"%d\",style = filled, fillcolor = purple] \n", tmp, tmp->get_data()->value);
+            }
         }
     }
 
     return;
+}
+
+tree_element* tree::fill_by_lines(tree_element* start_root)
+{
+    //tree_element* tmp_root = nullptr;
+    int start_number_of_lines = objs_->number_of_lines;
+
+    if (objs_->number_of_lines > 2)
+    {
+        tree_element* right_subtree = get_statement();
+        objs_->number_of_lines--;
+
+        tree_element* left_subtree = nullptr;
+        left_subtree = fill_by_lines(left_subtree);
+
+        start_root = create_root(create_object(BINDER, start_number_of_lines), left_subtree, right_subtree);
+    }
+    else
+    {
+        tree_element* right_subtree = get_statement();
+        tree_element* left_subtree = get_statement();
+        start_root = create_root(create_object(BINDER, objs_->number_of_lines), left_subtree, right_subtree);
+    }
+
+    //printf("start_root = %p\n", start_root);
+
+    return start_root;
 }
 
 void tree::fill_tree(struct Objects* main_object, bool need_print)
@@ -1882,8 +1950,22 @@ void tree::fill_tree(struct Objects* main_object, bool need_print)
     assert(main_object && "nullptr Objects struct");
 
     objs_ = main_object;
+    int number_of_lines = objs_->number_of_lines;
 
-    root_ = get_statement();//get_expression();
+    printf("Number of lines is %lu\n", objs_->number_of_lines);
+
+    if (number_of_lines == 0)
+        printf("0 lines in text.txt\nLeave..\n");
+    else if (number_of_lines == 1)
+    {
+        root_ = get_statement();
+    }
+    else
+    {
+        root_ = fill_by_lines(root_);
+    }
+        
+    objs_->number_of_lines = number_of_lines;
 
     if(need_print)
         show_tree("start_tree");
@@ -1905,6 +1987,9 @@ const char* get_type_of_object(TYPE type)
             return "Variable";
         case FUNCTION:
             return "Function";
+        case END_OF_LINE:
+            return "END-LINE symbol";
+            break;
         default:
             return "UNINDENTIFIED TYPE";
     }
@@ -1944,6 +2029,8 @@ const char* get_value_of_object(struct Objects* objs, struct Object* obj)
                 return "ln";
             case EXP_VAL:
                 return "exp";
+            case END_OF_LINE_VAL:
+                return ";";
             default:
                 return "UNINDENTIFIED TYPE";
         }
@@ -1961,9 +2048,13 @@ tree_element* tree::get_statement()
         cur_size_++;
         result = CR_STATEMENT(tmp_element_1, get_expression());
     }
-    else 
+    else
+    {
+        cur_size_++;
         return tmp_element_1;
+    }
 
+    cur_size_++;
     return result;
 }
 
@@ -1973,20 +2064,6 @@ tree_element* tree::get_expression()
     
     if ((objs_->obj[cur_size_].type_of_object == OPERATOR) && ((objs_->obj[cur_size_].value == OP_MIN_VAL) || (objs_->obj[cur_size_].value == OP_PLUS_VAL)))
     {
-        /*tree_element* tmp_element = new tree_element;
-        tmp_element->set_data(&(objs_->obj[cur_size_]));
-
-        tree_element* tmp_element_2 = nullptr;
-
-        cur_size_++; // if ----, then I need to while(IS_OP_PLUS OR MIN) cur_size_++;
-
-        tmp_element_2 = get_operator();
-
-        tmp_element->set_right(tmp_element_1);
-        tmp_element->set_left(tmp_element_2);
-        
-        return tmp_element;*/
-
         if (objs_->obj[cur_size_].value == OP_MIN_VAL)
         {
             cur_size_++;
@@ -2028,6 +2105,18 @@ tree_element* tree::get_expression()
             else
             {
                 printf("BAD BRACKETS in get_express\n");
+            }
+        }
+        if (objs_->obj[cur_size_].type_of_object == END_OF_LINE)
+        {
+            if ((tmp_element->get_left() == nullptr) && (tmp_element->get_right() == nullptr))
+            {
+                tmp_element = tmp_element_1;
+                return tmp_element;
+            }
+            else
+            {
+                return tmp_element;
             }
         }
 
@@ -2083,7 +2172,7 @@ tree_element* tree::get_expression()
         }
         
 
-    } while ((objs_->obj[cur_size_].type_of_object == OPERATOR) && ((objs_->obj[cur_size_].value == OP_MIN_VAL) || (objs_->obj[cur_size_].value == OP_PLUS_VAL)));
+    } while ( (IS_PLUS_OR_MIN()) && !(objs_->obj[cur_size_].type_of_object == END_OF_LINE));
 
     return tmp_element;
 }

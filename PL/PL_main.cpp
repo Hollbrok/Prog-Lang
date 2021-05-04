@@ -13,19 +13,19 @@ int main()
 
 
 	Objects* objs = fill_structures(text);
-	tree PL_tree("FORTNITE_TREE");
+	tree PL_tree("PL_TREE");
 
 	//print_objects(objs);
 
 	PL_tree.fill_tree(objs, true);
-	PL_tree.show_tree();
+	//PL_tree.show_tree();
 
-	char* asm_text_buf = PL_tree.make_assem_text();
+	/*char* asm_text_buf = PL_tree.make_assem_text();
 	
 	FILE* asm_text_file = fopen("user_code[for_user].asm", "wb");
 	assert(asm_text_file);
 
-	fwrite(asm_text_buf, sizeof(char), strlen(asm_text_buf), asm_text_file);
+	fwrite(asm_text_buf, sizeof(char), strlen(asm_text_buf), asm_text_file);*/
 	
 	//printf("[%s]\n", asm_text);
 	//dif_tree.make_article();

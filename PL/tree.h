@@ -118,6 +118,10 @@ public:
 	void graphviz_beauty_dump(const char* dumpfile_name)
 		const;
 
+	int count_num_of_lines(tree_element* start_root);
+
+	tree_element* fill_by_lines(tree_element* start_root);
+
 
 	void show_tree(const char* name_of_file = "beauty_dump") const;
 

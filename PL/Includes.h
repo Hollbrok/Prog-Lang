@@ -37,6 +37,7 @@ struct Objects {
 	char* variables_names[NUMBER_OF_VARIABLES] = {};
 
 	size_t number_of_objects = 0;
+	size_t number_of_lines = 0;
 
 };
 
@@ -55,6 +56,8 @@ enum TYPES
 	BRACKET		= 3,
 	VARIABLE	= 4,
 	FUNCTION	= 5,
+	BINDER		= 9,
+	END_OF_LINE = 10,
 };
 
 enum BRACKET_VALUES
@@ -89,6 +92,12 @@ enum NUMBER_CONSTANTS
 	EXP_VAL = 20,
 	PI_VAL	= 21,
 };
+
+enum SPECIAL_VALUES
+{
+	END_OF_LINE_VAL = 100,
+};
+
 
 
 /* Debug memory allocation support */
