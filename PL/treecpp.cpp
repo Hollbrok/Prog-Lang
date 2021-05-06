@@ -6,8 +6,8 @@ int FORMULA_COUNTER = 1;
 
 bool is_free_objs = false;
 
-#define IS_FUNCTION(root)                                       \
-    (root->get_data_type() == FUNCTION)
+#define IS_ARITHMETIC_FUNCTION(root)                                       \
+    (root->get_data_type() == ARITHMETIC_FUNCTION)
 
 #define IS_END_OF_LINE(root)                                    \
     (root->get_data_type() == END_OF_LINE)
@@ -82,7 +82,7 @@ bool is_free_objs = false;
     copy_subtree(start_root)
 
 #define CR_LN                                                   \
-    create_object(FUNCTION, LN_VAL)
+    create_object(ARITHMETIC_FUNCTION, LN_VAL)
 
 #define CR_MUL                                                  \
     create_object(OPERATOR, OP_TIMES_VAL)
@@ -109,7 +109,7 @@ bool is_free_objs = false;
     start_root->get_data_type()
 
 #define PRINT_L_PART_OF_MUL                                                                                         \
-    if ( IS_FUNCTION(Lroot(start_root))  || IS_NUMBER(Lroot(start_root)) || IS_VARIABLE(Lroot(start_root)) ||       \
+    if ( IS_ARITHMETIC_FUNCTION(Lroot(start_root))  || IS_NUMBER(Lroot(start_root)) || IS_VARIABLE(Lroot(start_root)) ||       \
         IS_POW(Lroot(start_root)) || IS_POW(Lroot(start_root)) || IS_MUL(Lroot(start_root)) || IS_DEL(Lroot(start_root)))   \
     {                                                                                                               \
         print_subtree(Lroot(start_root), buffer);                                                                   \
@@ -124,7 +124,7 @@ bool is_free_objs = false;
 
 
 #define PRINT_R_PART_OF_MUL                                                                                         \
-    if (IS_FUNCTION(Rroot(start_root)) || IS_NUMBER(Rroot(start_root)) || IS_VARIABLE(Rroot(start_root)) ||         \
+    if (IS_ARITHMETIC_FUNCTION(Rroot(start_root)) || IS_NUMBER(Rroot(start_root)) || IS_VARIABLE(Rroot(start_root)) ||         \
         IS_POW(Rroot(start_root)) || IS_POW(Rroot(start_root)) || IS_MUL(Rroot(start_root)) || IS_DEL(Rroot(start_root)))         \
     {                                                                                                               \
         print_subtree(Rroot(start_root), buffer);                                                                   \
@@ -210,11 +210,11 @@ void tree::get_asm_text(tree_element* start_root,char* buffer)
             return;
             break;
         }
-        case FUNCTION:
-            printf("Still need to add case FUNCTION in get_asm_text");
+        case ARITHMETIC_FUNCTION:
+            printf("Still need to add case ARITHMETIC_FUNCTION in get_asm_text");
             break;
         case END_OF_LINE: // Вообще в дереве не должно быть ";"
-            printf("Still need to add case FUNCTION in get_asm_text");
+            printf("Still need to add case ARITHMETIC_FUNCTION in get_asm_text");
             break;
         default:
             PRINT_UNDEFINE_TYPE;
@@ -269,7 +269,7 @@ bool tree_element::check_numbers(tree_element* start_root)
         return false;
     if (GET_TYPE == NUMBER)
         return true;
-    if (GET_TYPE == FUNCTION)
+    if (GET_TYPE == ARITHMETIC_FUNCTION)
         return false;//return check_numbers(Lroot(start_root));
 
     if (Lroot(start_root))
@@ -348,7 +348,7 @@ void tree::optimizer_number(tree_element* start_root)
             return;
         case VARIABLE:
             return;
-        case FUNCTION:
+        case ARITHMETIC_FUNCTION:
         {
             if (check_numbers(Lroot(start_root)))
             {
@@ -469,7 +469,7 @@ void tree::optimizer_operator(tree_element* start_root)
         return;
     case VARIABLE:
         return;
-    case FUNCTION:
+    case ARITHMETIC_FUNCTION:
     {
         /*if (check_numbers(Lroot(start_root)))
         {
@@ -908,7 +908,7 @@ void tree::print_subtree(tree_element* start_root, char* buffer)
             return;
             break;
         }
-        case FUNCTION:
+        case ARITHMETIC_FUNCTION:
         {
             strcat(buffer, "\\");
             strcat(buffer, get_value_of_object(objs_, start_root->get_data()));
@@ -1354,7 +1354,7 @@ tree_element* tree::differenciate(tree_element* start_root)
         case VARIABLE:
             fprintf(tex_, "В свою же очередь производная от переменной = $- \\cos(\\pi) + \\sin(0) = 1$.\n\n");
             return CR_NUMBER(1);
-        case FUNCTION:
+        case ARITHMETIC_FUNCTION:
         {
             switch (GET_VAL)
             {
@@ -1452,7 +1452,6 @@ tree::tree(const char* name) :
     error_state_(0),
     name_(name),
     root_(nullptr)
-    //buffer_(nullptr)
 {
     is_free_objs = true;
     assert(this && "You passed nullptr to constructor");
@@ -1919,13 +1918,12 @@ void print_all_elements_beauty(tree_element* tmp, FILE* dump, struct Objects* ob
 
 tree_element* tree::fill_by_lines(tree_element* start_root)
 {
-    //tree_element* tmp_root = nullptr;
-    int start_number_of_lines = objs_->number_of_lines;
+    int start_number_of_lines = objs_->number_of_statements;
 
-    if (objs_->number_of_lines > 2)
+    if (objs_->number_of_statements > 2)
     {
         tree_element* right_subtree = get_statement();
-        objs_->number_of_lines--;
+        objs_->number_of_statements--;
 
         tree_element* left_subtree = nullptr;
         left_subtree = fill_by_lines(left_subtree);
@@ -1936,12 +1934,79 @@ tree_element* tree::fill_by_lines(tree_element* start_root)
     {
         tree_element* right_subtree = get_statement();
         tree_element* left_subtree = get_statement();
-        start_root = create_root(create_object(BINDER, objs_->number_of_lines), left_subtree, right_subtree);
+        start_root = create_root(create_object(BINDER, objs_->number_of_statements), left_subtree, right_subtree);
     }
 
     //printf("start_root = %p\n", start_root);
 
     return start_root;
+}
+
+tree_element* tree::fill_by_lines(tree_element* start_root, int& number_of_lines)
+{
+    int start_number_of_lines = number_of_lines;
+
+    if (number_of_lines > 2)
+    {
+        tree_element* right_subtree = get_statement();
+        number_of_lines--;
+
+        tree_element* left_subtree = nullptr;
+        left_subtree = fill_by_lines(left_subtree, number_of_lines);
+
+        start_root = create_root(create_object(BINDER, start_number_of_lines), left_subtree, right_subtree);
+    }
+    else
+    {
+        tree_element* right_subtree = get_statement();
+        tree_element* left_subtree = get_statement();
+        start_root = create_root(create_object(BINDER, number_of_lines), left_subtree, right_subtree);
+    }
+
+    //printf("start_root = %p\n", start_root);
+
+    return start_root;
+}
+
+int tree::count_statements()
+{
+    int num_of_statements = 0;
+    //printf("number of objects = %d\n", objs_->number_of_objects);
+
+    for (int i = 0; i < objs_->number_of_objects; i++)
+        if (objs_->obj[i].type_of_object == BLOCK_BRACKET)
+        {
+            //printf("Block bracket on i = %d\n", i);
+            int counter_of_block_brackets = 1;
+            i++;
+
+            while (counter_of_block_brackets != 0)//(!((objs_->obj[i].type_of_object == BLOCK_BRACKET) && (objs_->obj[i].value == R_BRACKET_BLOCK_VAL)))
+            {
+                if ((objs_->obj[i].type_of_object == BLOCK_BRACKET) && (objs_->obj[i].value == R_BRACKET_BLOCK_VAL))
+                {
+                    //printf("find R on i = %d\n", i);
+                    counter_of_block_brackets--;
+                    //num_of_statements++;
+                }
+                else if ((objs_->obj[i].type_of_object == BLOCK_BRACKET) && (objs_->obj[i].value == L_BRACKET_BLOCK_VAL))
+                {
+                   // printf("find L on i = %d\n", i);
+                    counter_of_block_brackets++;
+                }
+                i++;
+            }
+            //i--;
+            //printf("end on i = %d\n", i);
+
+            num_of_statements++;
+        }
+        else 
+            if (objs_->obj[i].type_of_object == END_OF_LINE)
+                num_of_statements++;
+
+    //printf("num of statements = %d\n", num_of_statements);
+
+    return num_of_statements;
 }
 
 void tree::fill_tree(struct Objects* main_object, bool need_print)
@@ -1950,22 +2015,26 @@ void tree::fill_tree(struct Objects* main_object, bool need_print)
     assert(main_object && "nullptr Objects struct");
 
     objs_ = main_object;
-    int number_of_lines = objs_->number_of_lines;
+   
+    int number_of_statements = count_statements();//objs_->number_of_lines;
+    objs_->number_of_statements = number_of_statements;
+    //printf("Number of lines is %lu\n", objs_->number_of_lines);
+    
+    printf("statements = %d\n", number_of_statements);
 
-    printf("Number of lines is %lu\n", objs_->number_of_lines);
-
-    if (number_of_lines == 0)
+    if (number_of_statements == 0)
         printf("0 lines in text.txt\nLeave..\n");
-    else if (number_of_lines == 1)
+
+    else if (number_of_statements == 1)
     {
-        root_ = get_statement();
+        root_ = get_statement();//get_block();//get_statement();
     }
     else
     {
         root_ = fill_by_lines(root_);
     }
         
-    objs_->number_of_lines = number_of_lines;
+    objs_->number_of_statements = number_of_statements;//objs_->number_of_lines = number_of_lines;
 
     if(need_print)
         show_tree("start_tree");
@@ -1985,7 +2054,7 @@ const char* get_type_of_object(TYPE type)
             return "Bracket";
         case VARIABLE:
             return "Variable";
-        case FUNCTION:
+        case ARITHMETIC_FUNCTION:
             return "Function";
         case END_OF_LINE:
             return "END-LINE symbol";
@@ -2009,6 +2078,10 @@ const char* get_value_of_object(struct Objects* objs, struct Object* obj)
                 return "(";
             case R_BRACKET_VAL:
                 return ")";
+            case L_BRACKET_BLOCK_VAL:
+                return "{";
+            case R_BRACKET_BLOCK_VAL:
+                return "}";
             case OP_PLUS_VAL:
                 return "+";
             case OP_MIN_VAL:
@@ -2021,6 +2094,10 @@ const char* get_value_of_object(struct Objects* objs, struct Object* obj)
                 return "^";
             case OP_EQUAL_VAL:
                 return "=";
+            case OP_BELOW_VAL:
+                return "<";
+            case OP_ABOVE_VAL:
+                return ">";
             case SIN_VAL:
                 return "sin";
             case COS_VAL:
@@ -2031,6 +2108,12 @@ const char* get_value_of_object(struct Objects* objs, struct Object* obj)
                 return "exp";
             case END_OF_LINE_VAL:
                 return ";";
+            case IF_VAL:
+                return "if";
+            case WHILE_VAL:
+                return "while";
+            case FOR_VAL:
+                return "for";
             default:
                 return "UNINDENTIFIED TYPE";
         }
@@ -2038,10 +2121,113 @@ const char* get_value_of_object(struct Objects* objs, struct Object* obj)
 
 }
 
+tree_element* tree::get_block()
+{
+    tree_element* result = nullptr;
+
+    //int start_number_of_lines = objs_->obj[cur_size_].value;
+
+    if (objs_->obj[cur_size_].type_of_object != BLOCK_BRACKET)
+    {
+        printf("here\n");
+        //cur_size_ ++; //MAYBE??
+        return get_statement();//result = get_statement();
+        //cur_size_++;
+    }
+    else if (objs_->obj[cur_size_].value != L_BRACKET_BLOCK_VAL)
+    {
+        printf("ERROR IN BRACKET. LEave..\n");
+        return nullptr;
+    }
+    else
+    {
+        cur_size_++; // from '{' to next element
+
+        int true_lines = 0;
+        int tmp_cur_size = cur_size_;
+
+        int bracket_counter = 1;
+
+        while (bracket_counter != 0)//(objs_->obj[tmp_cur_size].value != R_BRACKET_BLOCK_VAL)
+        {
+            if ((objs_->obj[tmp_cur_size].type_of_object == BLOCK_BRACKET) && (objs_->obj[tmp_cur_size].value == R_BRACKET_BLOCK_VAL))
+            {
+               // printf("find R on i = %d\n", i);
+                bracket_counter--;
+                //num_of_statements++;
+            }
+            else if ((objs_->obj[tmp_cur_size].type_of_object == BLOCK_BRACKET) && (objs_->obj[tmp_cur_size].value == L_BRACKET_BLOCK_VAL))
+            {
+                //printf("find L on i = %d\n", i);
+                bracket_counter++;
+            }
+
+            if ((objs_->obj[tmp_cur_size].type_of_object == END_OF_LINE) && (objs_->obj[tmp_cur_size].value == END_OF_LINE_VAL))
+            {
+                true_lines++;
+                tmp_cur_size++;
+            }
+
+            else tmp_cur_size++;
+        }
+
+        printf("true_lines = %d\n", true_lines);
+        int start_number_of_lines = true_lines;
+
+        if (true_lines > 1) 
+        {
+            //printf("MORE THAN 1 LINE!\n");
+            int number_of_lines = true_lines;
+
+            if (number_of_lines > 2)
+            {
+                tree_element* right_subtree = get_statement();
+                //cur_size_--;// temporarily
+
+                number_of_lines--;
+
+                tree_element* left_subtree = nullptr;
+                left_subtree = fill_by_lines(left_subtree, number_of_lines);
+
+                result = create_root(create_object(BINDER, true_lines), left_subtree, right_subtree);
+            }
+            else
+            {
+                tree_element* right_subtree = get_statement();
+                tree_element* left_subtree = get_statement();
+                result = create_root(create_object(BINDER, start_number_of_lines), left_subtree, right_subtree);
+            }
+                //printf("LOGIC ERROR(SIMPLE FIX, I KNOW HOW TO DO THIS) line: %d\n", __LINE__);
+
+            return result;
+        }
+        else
+        {
+            /*tree_element* right_subtree = get_statement();
+            tree_element* left_subtree = get_statement();
+            result = create_root(create_object(BINDER, start_number_of_lines), left_subtree, right_subtree);*/
+            result = get_statement();
+        }
+    }
+}
+
 tree_element* tree::get_statement()
 {
-    tree_element* tmp_element_1 = get_number();//get_expression(); // x
     tree_element* result = nullptr;
+    if ((objs_->obj[cur_size_].type_of_object == LOGICAL_FUNCTION) && (objs_->obj[cur_size_].value == IF_VAL))
+    {
+        cur_size_++;
+        tree_element* if_argument = get_bracket();
+
+        tree_element* if_block    = get_block();
+        result = create_root(create_object(LOGICAL_FUNCTION, IF_VAL), if_argument, if_block);
+        
+        cur_size_++; // MAYBE += 2 !!!!!!
+        return result;
+    }
+
+    tree_element* tmp_element_1 = get_number();//get_expression(); // x
+
 
     if ((objs_->obj[cur_size_].type_of_object == OPERATOR) && (objs_->obj[cur_size_].value == OP_EQUAL_VAL))
     {
@@ -2184,7 +2370,7 @@ tree_element* tree::get_operator()
 
     if ((objs_->obj[cur_size_].type_of_object == OPERATOR) && ((objs_->obj[cur_size_].value == OP_TIMES_VAL) || (objs_->obj[cur_size_].value == OP_DEL_VAL)))
     {
-        tmp_element->set_right(tmp_element_1);
+        tmp_element->set_left(tmp_element_1);
         tmp_element_1->set_prev(tmp_element);
     }
     else
@@ -2195,7 +2381,7 @@ tree_element* tree::get_operator()
 
     while ((objs_->obj[cur_size_].type_of_object == OPERATOR) && ((objs_->obj[cur_size_].value == OP_TIMES_VAL) || (objs_->obj[cur_size_].value == OP_DEL_VAL)))
     {
-        if ((tmp_element->get_left() != nullptr))
+        if ((tmp_element->get_right() != nullptr))
         {
             tree_element* new_tmp_element = new tree_element;
          
@@ -2224,7 +2410,7 @@ tree_element* tree::get_operator()
             tree_element* tmp_element_2 = nullptr;
             tmp_element_2 = get_pow();
 
-            tmp_element->set_left(tmp_element_2);
+            tmp_element->set_right(tmp_element_2);
             tmp_element_2->set_prev(tmp_element);
 
         }
@@ -2298,7 +2484,7 @@ tree_element* tree::get_func()
     {
         tmp_element = get_number();
     }
-    else if (objs_->obj[cur_size_].type_of_object == FUNCTION)
+    else if (objs_->obj[cur_size_].type_of_object == ARITHMETIC_FUNCTION)
     {
         switch (objs_->obj[cur_size_].value)
         {
@@ -2310,11 +2496,11 @@ tree_element* tree::get_func()
             case SH_VAL:
             case CH_VAL:
             {
-                tmp_element = create_root(create_object(FUNCTION, objs_->obj[cur_size_++].value), get_bracket());
+                tmp_element = create_root(create_object(ARITHMETIC_FUNCTION, objs_->obj[cur_size_++].value), get_bracket());
                 break;
             }
             default:
-                printf("Undefined type of function\ntype = %d\n", objs_->obj[cur_size_].value);
+                printf("Undefined type of ARITHMETIC function\ntype = %d\n", objs_->obj[cur_size_].value);
                 return nullptr;
         }
 

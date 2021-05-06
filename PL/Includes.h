@@ -38,6 +38,7 @@ struct Objects {
 
 	size_t number_of_objects = 0;
 	size_t number_of_lines = 0;
+	size_t number_of_statements = 0;
 
 };
 
@@ -51,32 +52,53 @@ struct Object
 
 enum TYPES
 {
-	OPERATOR	= 1,
-	NUMBER		= 2,
-	BRACKET		= 3,
-	VARIABLE	= 4,
-	FUNCTION	= 5,
-	BINDER		= 9,
-	END_OF_LINE = 10,
+	OPERATOR	= 1, // enum
+	NUMBER		= 2, // the number itself
+	BRACKET		= 3, // enum
+	VARIABLE	= 4, // number in massive of variables
+	ARITHMETIC_FUNCTION	= 5, // enum
+	USER_FUNCTION		= 6, 
+	LOGICAL_FUNCTION	= 7, // enum
+	BINDER		= 9,		 // just number but with special meaning
+	END_OF_LINE = 10,		 // enum
+
+
+	BLOCK_BRACKET = 13, //!!! MAYBE I NEED TO DO 13 instead of 3, но придется возможно усложнить get_bracket или написать get_block
 };
 
-enum BRACKET_VALUES
+enum BRACKET_VALUES // [0 - 3]
 {
-	L_BRACKET_VAL = 1,
-	R_BRACKET_VAL = 2,
+	L_BRACKET_VAL = 0,
+	R_BRACKET_VAL = 1,
+
+	L_BRACKET_BLOCK_VAL = 2,
+	R_BRACKET_BLOCK_VAL = 3,
 };
 
-enum OPERATORS_VALUES
+enum OPERATORS_VALUES // [4 - 9] + [30 - 39]
 {
-	OP_PLUS_VAL		= 3,
-	OP_MIN_VAL		= 4,
-	OP_TIMES_VAL	= 5,
-	OP_DEL_VAL		= 6,
-	OP_POW_VAL		= 7,
-	OP_EQUAL_VAL	= 8,
+	OP_PLUS_VAL		= 4,
+	OP_MIN_VAL		= 5,
+	OP_TIMES_VAL	= 6,
+	OP_DEL_VAL		= 7,
+	OP_POW_VAL		= 8,
+	OP_EQUAL_VAL	= 9,
+
+	OP_BELOW_VAL	= 30,
+	OP_ABOVE_VAL	= 31,
+
 };
 
-enum FACTIONS_VALUES
+enum LOGIC_FUNCTION_VALUES // [50-99]
+{
+	IF_VAL		= 50,
+	WHILE_VAL	= 51,
+	FOR_VAL		= 52,
+
+
+};
+
+enum ARITH_FUTIONS_VALUES // [10-19]
 {
 	SIN_VAL			= 10,
 	COS_VAL			= 11,
@@ -87,13 +109,13 @@ enum FACTIONS_VALUES
 	CH_VAL			= 16,
 };
 
-enum NUMBER_CONSTANTS
+enum NUMBER_CONSTANTS // [20-29]
 {
 	EXP_VAL = 20,
 	PI_VAL	= 21,
 };
 
-enum SPECIAL_VALUES
+enum SPECIAL_VALUES // [100 .. ]
 {
 	END_OF_LINE_VAL = 100,
 };

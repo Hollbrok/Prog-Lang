@@ -44,6 +44,7 @@ struct Objects* fill_structures(FILE* text)
 			obj[obj_counter++].value = END_OF_LINE_VAL;
 			number_of_lines++;
 		}
+
 		else if (buffer[i] == ')')
 		{
 			obj[obj_counter].type_of_object = BRACKET;
@@ -54,6 +55,18 @@ struct Objects* fill_structures(FILE* text)
 			obj[obj_counter].type_of_object = BRACKET;
 			obj[obj_counter++].value = L_BRACKET_VAL;
 		}
+
+		else if (buffer[i] == '}')
+		{
+			obj[obj_counter].type_of_object = BLOCK_BRACKET;
+			obj[obj_counter++].value = R_BRACKET_BLOCK_VAL;
+		}
+		else if (buffer[i] == '{')
+		{
+			obj[obj_counter].type_of_object = BLOCK_BRACKET;
+			obj[obj_counter++].value = L_BRACKET_BLOCK_VAL;
+		}
+
 		else if (buffer[i] == '+')
 		{
 			obj[obj_counter].type_of_object = OPERATOR;
@@ -89,44 +102,51 @@ struct Objects* fill_structures(FILE* text)
 			obj[obj_counter].type_of_object = OPERATOR;
 			obj[obj_counter++].value = OP_EQUAL_VAL;
 		}
+		else if (!strncmp(&buffer[i], "if", 2))
+		{
+			obj[obj_counter].type_of_object = LOGICAL_FUNCTION;
+			obj[obj_counter++].value = IF_VAL;
+
+			i += 2 - 1;
+		}
 		else if (!strncmp(&buffer[i], "ln", 2))
 		{
-			obj[obj_counter].type_of_object = FUNCTION;
+			obj[obj_counter].type_of_object = ARITHMETIC_FUNCTION;
 			obj[obj_counter++].value = LN_VAL;
 
 			i += 2 - 1;
 		}
 		else if (!strncmp(&buffer[i], "sin", 3))
 		{
-			obj[obj_counter].type_of_object = FUNCTION;
+			obj[obj_counter].type_of_object = ARITHMETIC_FUNCTION;
 			obj[obj_counter++].value = SIN_VAL;
 
 			i += 3 - 1;
 		}
 		else if (!strncmp(&buffer[i], "cos", 3))
 		{
-			obj[obj_counter].type_of_object = FUNCTION;
+			obj[obj_counter].type_of_object = ARITHMETIC_FUNCTION;
 			obj[obj_counter++].value = COS_VAL;
 
 			i += 3 - 1;
 		}
 		else if (!strncmp(&buffer[i], "tg", 2))
 		{
-			obj[obj_counter].type_of_object = FUNCTION;
+			obj[obj_counter].type_of_object = ARITHMETIC_FUNCTION;
 			obj[obj_counter++].value = TG_VAL;
 
 			i += 2 - 1;
 		}
 		else if (!strncmp(&buffer[i], "ctg", 3))
 		{
-			obj[obj_counter].type_of_object = FUNCTION;
+			obj[obj_counter].type_of_object = ARITHMETIC_FUNCTION;
 			obj[obj_counter++].value = CTG_VAL;
 
 			i += 3 - 1;
 		}
 		else if (!strncmp(&buffer[i], "sh", 2))
 		{
-			obj[obj_counter].type_of_object = FUNCTION;
+			obj[obj_counter].type_of_object = ARITHMETIC_FUNCTION;
 			obj[obj_counter++].value = SH_VAL;
 
 			i += 2 - 1;
@@ -134,7 +154,7 @@ struct Objects* fill_structures(FILE* text)
 		else if (!strncmp(&buffer[i], "ch", 2))
 		{
 			//printf("GOOD LN\n");
-			obj[obj_counter].type_of_object = FUNCTION;
+			obj[obj_counter].type_of_object = ARITHMETIC_FUNCTION;
 			obj[obj_counter++].value = CH_VAL;
 
 			i += 2 - 1;
@@ -213,19 +233,34 @@ void print_objects(Objects* object)
 			printf("%d. type is NUMBER, value is %d\n", i, object->obj[i].value);
 			break;
 		case BRACKET:
-			printf("%d. type is BRACKET, value is %d\n", i, object->obj[i].value);
+			if(object->obj[i].value == R_BRACKET_VAL)
+				printf("%d. type is R_BRACKET, value is %d\n\n", i, object->obj[i].value);
+			else 
+				printf("\n%d. type is L_BRACKET, value is %d\n", i, object->obj[i].value);
+			break;
+		case BLOCK_BRACKET:
+			if (object->obj[i].value == R_BRACKET_BLOCK_VAL)
+				printf("%d. type is R_BLOCK_BRACKET, value is %d\n\n", i, object->obj[i].value);
+			else
+				printf("\n%d. type is L_BLOCK_BRACKET, value is %d\n", i, object->obj[i].value);
 			break;
 		case VARIABLE:
 			printf("%d. type is VARIABLE, value is %d\n", i, object->obj[i].value);
 			break;
-		case FUNCTION:
-			printf("%d. type is FUNCTION, value is %d\n", i, object->obj[i].value);
+		case ARITHMETIC_FUNCTION:
+			printf("%d. type is ARITHMETIC_FUNCTION, value is %d\n", i, object->obj[i].value);
 			break;
 		case END_OF_LINE:
 			printf("%d. type is END OF LINE, value is %d\n", i, object->obj[i].value);
 			break;
+		case LOGICAL_FUNCTION:
+			printf("%d. type is LOGICAL FUNCTION, value is %d\n", i, object->obj[i].value);
+			break;
+		case BINDER:
+			printf("%d. type is BINDER, value is %d\n", i, object->obj[i].value);
+			break;
 		default:
-			printf("UNINDENTIFIED TYPE\n");
+			printf("UNINDENTIFIED TYPE in print_objects\n");
 			break;
 		}
 	}

@@ -122,10 +122,15 @@ public:
 
 	tree_element* fill_by_lines(tree_element* start_root);
 
+	tree_element* fill_by_lines(tree_element* start_root, int& number_of_lines);
 
 	void show_tree(const char* name_of_file = "beauty_dump") const;
+	
+	int count_statements();
 
 	void fill_tree(Objects* main_object, bool need_print = false);
+
+	tree_element* get_block();
 
 	tree_element* get_statement();
 
