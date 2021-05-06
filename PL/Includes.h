@@ -22,7 +22,7 @@ constexpr int NUMBER_OF_VARIABLES = 10;
 constexpr int MAX_NAME_SIZE = 10;
 
 constexpr int MAX_FORMULA_SIZE = 300;
-constexpr int MAX_ASMFILE_SIZE = 1000;
+constexpr int MAX_ASMFILE_SIZE = 10000;
 
 using TYPE = int;
 using VALUE = int;
@@ -56,9 +56,12 @@ enum TYPES
 	NUMBER		= 2, // the number itself
 	BRACKET		= 3, // enum
 	VARIABLE	= 4, // number in massive of variables
+
 	ARITHMETIC_FUNCTION	= 5, // enum
 	USER_FUNCTION		= 6, 
 	LOGICAL_FUNCTION	= 7, // enum
+	LOGICAL_OPERATOR	= 8, // enum
+
 	BINDER		= 9,		 // just number but with special meaning
 	END_OF_LINE = 10,		 // enum
 
@@ -75,7 +78,7 @@ enum BRACKET_VALUES // [0 - 3]
 	R_BRACKET_BLOCK_VAL = 3,
 };
 
-enum OPERATORS_VALUES // [4 - 9] + [30 - 39]
+enum OPERATORS_VALUES // [4 - 9]
 {
 	OP_PLUS_VAL		= 4,
 	OP_MIN_VAL		= 5,
@@ -84,9 +87,14 @@ enum OPERATORS_VALUES // [4 - 9] + [30 - 39]
 	OP_POW_VAL		= 8,
 	OP_EQUAL_VAL	= 9,
 
-	OP_BELOW_VAL	= 30,
-	OP_ABOVE_VAL	= 31,
 
+};
+
+enum LOGIC_VALUES //  [30 - 39]
+{
+	OP_IS_EQUAL_VAL = 30, // ==
+	OP_BELOW_VAL	= 31, // <
+	OP_ABOVE_VAL	= 32, // >
 };
 
 enum LOGIC_FUNCTION_VALUES // [50-99]

@@ -132,6 +132,10 @@ public:
 
 	tree_element* get_block();
 
+
+	tree_element* get_logic();
+	tree_element* get_part_of_logic();
+
 	tree_element* get_statement();
 
 	tree_element* get_expression();
@@ -148,15 +152,18 @@ public:
 
 	tree_element* differenciate(tree_element* new_root);
 
+	
 	char* make_assem_text();
 	void get_asm_text(tree_element* start_root, char* buffer);
+	void get_asm_text_by_lines(tree_element* start_root, char* buffer);
+
+	bool check_logic_op(tree_element* start_root);
+
 
 	void make_article(const char* name_of_file = "Greek.pdf");
 
 	void print_subtree(tree_element* start_root, char* buffer);
 	char* get_formula(tree_element* start_root);
-
-	void main_print(FILE* tex);
 
 	void optimizer_number(tree_element* start_root);
 	void optimizer_operator(tree_element* start_root);
@@ -181,14 +188,6 @@ const char* get_value_of_object(struct Objects* objs, struct Object* obj);
 void Objs_destructor(struct Objects* objs);
 Object* create_object(int type, int value);
 tree_element* create_root(struct Object* obj, tree_element* left = nullptr, tree_element* right = nullptr, tree_element* prev = nullptr);
-
-
-void print_title(FILE* tex);
-void print_1_section(FILE* tex);
-void print_2_section(FILE* tex);
-
-void print_conclusion(FILE* tex);
-void print_used_books(FILE* tex);
 
 int hm_elements(tree_element* root);
 

@@ -102,6 +102,23 @@ struct Objects* fill_structures(FILE* text)
 			obj[obj_counter].type_of_object = OPERATOR;
 			obj[obj_counter++].value = OP_EQUAL_VAL;
 		}
+		else if (buffer[i] == '<')
+		{
+			obj[obj_counter].type_of_object = LOGICAL_OPERATOR;
+			obj[obj_counter++].value = OP_BELOW_VAL;
+		}
+		else if (buffer[i] == '>')
+		{
+			obj[obj_counter].type_of_object = LOGICAL_OPERATOR;
+			obj[obj_counter++].value = OP_ABOVE_VAL;
+		}
+		else if (!strncmp(&buffer[i], "==", 2))
+		{
+			obj[obj_counter].type_of_object = LOGICAL_OPERATOR;
+			obj[obj_counter++].value = OP_IS_EQUAL_VAL;
+
+			i += 2 - 1;
+		}
 		else if (!strncmp(&buffer[i], "if", 2))
 		{
 			obj[obj_counter].type_of_object = LOGICAL_FUNCTION;

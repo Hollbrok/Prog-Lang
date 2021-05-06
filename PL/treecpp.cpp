@@ -4,9 +4,12 @@ const double exp_value = 2.7182818284;
 
 int FORMULA_COUNTER = 1;
 
+int IF_COUNTER = 0;
+int LOGIC_COUNTER = 0;
+
 bool is_free_objs = false;
 
-#define IS_ARITHMETIC_FUNCTION(root)                                       \
+#define IS_ARITHMETIC_FUNCTION(root)                            \
     (root->get_data_type() == ARITHMETIC_FUNCTION)
 
 #define IS_END_OF_LINE(root)                                    \
@@ -27,8 +30,17 @@ bool is_free_objs = false;
 #define IS_DEL(root)                                            \
     ( (root->get_data_type() == OPERATOR) && (root->get_data_value() == OP_DEL_VAL) )
 
-#define IS_PLUS_OR_MIN()                                    \
+#define IS_R_B_BRACKET(index)                                          \
+    (objs_->obj[index].type_of_object == BLOCK_BRACKET) && (objs_->obj[index].value == R_BRACKET_BLOCK_VAL)
+
+#define IS_L_B_BRACKET(index)                                          \
+    (objs_->obj[index].type_of_object == BLOCK_BRACKET) && (objs_->obj[index].value == L_BRACKET_BLOCK_VAL)
+
+#define IS_PLUS_OR_MIN()                                        \
     (objs_->obj[cur_size_].type_of_object == OPERATOR) && ((objs_->obj[cur_size_].value == OP_MIN_VAL) || (objs_->obj[cur_size_].value == OP_PLUS_VAL))
+
+#define IS_LOGIC_OP                                             \
+    (objs_->obj[cur_size_].type_of_object == LOGICAL_OPERATOR) && ((objs_->obj[cur_size_].value == OP_IS_EQUAL_VAL) || (objs_->obj[cur_size_].value == OP_BELOW_VAL) || (objs_->obj[cur_size_].value == OP_ABOVE_VAL))
 
 #define L_AND_R_NULL(root)                                      \
     ( (root->get_left() == nullptr) && (root->get_right() == nullptr) )
@@ -46,10 +58,10 @@ bool is_free_objs = false;
     printf("Undefined OP value = [%s]\n", get_value_of_object(objs_, start_root->get_data()))
 
 #define PRINT_UNDEFINE_TYPE                                     \
-    printf("Undefined type of object = [%s]\n", get_type_of_object(start_root->get_data()->type_of_object))
+    printf("Undefined type of object = [%s]. Line: %d\n", get_type_of_object(start_root->get_data()->type_of_object), __LINE__)
 
 #define PRINT_UNDEFINE_FUNC                                     \
-    printf("Undefinied func = [%s]\n", get_value_of_object(objs_, start_root->get_data()))
+    printf("Undefinied func = [%s]. Line: %d\n", get_value_of_object(objs_, start_root->get_data()), __LINE__)
 
 #define ADD_OR_SUB(obj, left, right)                            \
     create_root(obj, left, right)
@@ -108,32 +120,32 @@ bool is_free_objs = false;
 #define GET_TYPE                                                \
     start_root->get_data_type()
 
-#define PRINT_L_PART_OF_MUL                                                                                         \
-    if ( IS_ARITHMETIC_FUNCTION(Lroot(start_root))  || IS_NUMBER(Lroot(start_root)) || IS_VARIABLE(Lroot(start_root)) ||       \
-        IS_POW(Lroot(start_root)) || IS_POW(Lroot(start_root)) || IS_MUL(Lroot(start_root)) || IS_DEL(Lroot(start_root)))   \
-    {                                                                                                               \
-        print_subtree(Lroot(start_root), buffer);                                                                   \
-        strcat(buffer, " \\cdot ");                                                                                 \
-    }                                                                                                               \
-    else                                                                                                            \
-    {                                                                                                               \
-        strcat(buffer, "\\left(");                                                                                  \
-        print_subtree(Lroot(start_root), buffer);                                                                   \
-        strcat(buffer, "\\right) \\cdot ");                                                                         \
+#define PRINT_L_PART_OF_MUL                                                                                                     \
+    if ( IS_ARITHMETIC_FUNCTION(Lroot(start_root))  || IS_NUMBER(Lroot(start_root)) || IS_VARIABLE(Lroot(start_root)) ||        \
+        IS_POW(Lroot(start_root)) || IS_POW(Lroot(start_root)) || IS_MUL(Lroot(start_root)) || IS_DEL(Lroot(start_root)))       \
+    {                                                                                                                           \
+        print_subtree(Lroot(start_root), buffer);                                                                               \
+        strcat(buffer, " \\cdot ");                                                                                             \
+    }                                                                                                                           \
+    else                                                                                                                        \
+    {                                                                                                                           \
+        strcat(buffer, "\\left(");                                                                                              \
+        print_subtree(Lroot(start_root), buffer);                                                                               \
+        strcat(buffer, "\\right) \\cdot ");                                                                                     \
     }                                                                                           
 
 
-#define PRINT_R_PART_OF_MUL                                                                                         \
-    if (IS_ARITHMETIC_FUNCTION(Rroot(start_root)) || IS_NUMBER(Rroot(start_root)) || IS_VARIABLE(Rroot(start_root)) ||         \
-        IS_POW(Rroot(start_root)) || IS_POW(Rroot(start_root)) || IS_MUL(Rroot(start_root)) || IS_DEL(Rroot(start_root)))         \
-    {                                                                                                               \
-        print_subtree(Rroot(start_root), buffer);                                                                   \
-    }                                                                                                               \
-    else                                                                                                            \
-    {                                                                                                               \
-        strcat(buffer, "\\left(");                                                                                  \
-        print_subtree(Rroot(start_root), buffer);                                                                   \
-        strcat(buffer, "\\right)");                                                                                 \
+#define PRINT_R_PART_OF_MUL                                                                                                     \
+    if (IS_ARITHMETIC_FUNCTION(Rroot(start_root)) || IS_NUMBER(Rroot(start_root)) || IS_VARIABLE(Rroot(start_root)) ||          \
+        IS_POW(Rroot(start_root)) || IS_POW(Rroot(start_root)) || IS_MUL(Rroot(start_root)) || IS_DEL(Rroot(start_root)))       \
+    {                                                                                                                           \
+        print_subtree(Rroot(start_root), buffer);                                                                               \
+    }                                                                                                                           \
+    else                                                                                                                        \
+    {                                                                                                                           \
+        strcat(buffer, "\\left(");                                                                                              \
+        print_subtree(Rroot(start_root), buffer);                                                                               \
+        strcat(buffer, "\\right)");                                                                                             \
     }
 
 int tree::count_num_of_lines(tree_element* start_root)
@@ -153,12 +165,49 @@ int tree::count_num_of_lines(tree_element* start_root)
     return counter;
 }
 
+void tree::get_asm_text_by_lines(tree_element* start_root, char* buffer)
+{
+    int start_number_of_lines = objs_->number_of_statements;
+
+    if (objs_->number_of_statements > 2)
+    {
+        get_asm_text(Rroot(start_root), buffer);//tree_element* right_subtree = get_statement();
+        objs_->number_of_statements--;
+        
+        strcat(buffer, "\n"); // may be need to add '\n'
+        
+        get_asm_text_by_lines(Lroot(start_root), buffer);
+
+    }
+
+    else // last string
+    {
+        //get_asm_text(start_root, buffer);
+        get_asm_text(Rroot(start_root), buffer);
+        //objs_->number_of_statements--;
+        strcat(buffer, "\n");
+        get_asm_text(Lroot(start_root), buffer);
+    }
+
+    return;
+}
+
 char* tree::make_assem_text()
 {
     char* buffer = new char[MAX_ASMFILE_SIZE] {0};
 
-    //strcat(buffer, "\\begin{equation}\n");
-    get_asm_text(root_, buffer);
+    int number_of_statements = objs_->number_of_statements;
+
+    if (number_of_statements == 0)
+        printf("0 lines in text.txt\nLeave..\n");
+    else if (number_of_statements == 1)
+        get_asm_text(root_, buffer);
+    else
+        get_asm_text_by_lines(root_, buffer);
+
+    objs_->number_of_statements = number_of_statements;
+
+    //get_asm_text(root_, buffer);
     
     strcat(buffer, "\n\thlt");
 
@@ -183,6 +232,7 @@ void tree::get_asm_text(tree_element* start_root,char* buffer)
                 }
                 case OP_PLUS_VAL:
                 {
+                    //strcat(buffer, "\tpush "); // !
                     get_asm_text(Lroot(start_root), buffer);
                     strcat(buffer, "\n\tpush ");
                     get_asm_text(Rroot(start_root), buffer);
@@ -214,9 +264,58 @@ void tree::get_asm_text(tree_element* start_root,char* buffer)
             printf("Still need to add case ARITHMETIC_FUNCTION in get_asm_text");
             break;
         case END_OF_LINE: // Вообще в дереве не должно быть ";"
-            printf("Still need to add case ARITHMETIC_FUNCTION in get_asm_text");
+            printf("LOGIC ERROR on line: %d\n", __LINE__);
             break;
+        case LOGICAL_FUNCTION:
+        {
+            switch (GET_VAL)
+            {
+                case IF_VAL:
+                {
+                    strcat(buffer, "\tpush 0\n");
+                    if (Lroot(start_root)->get_data_type() == LOGICAL_OPERATOR)
+                    {
+
+                    }
+                    else
+                    {
+                        strcat(buffer, "\tpush ");
+                        get_asm_text(Lroot(start_root), buffer);
+                    }
+
+                    strcat(buffer, "\n\tje :END_IF_");
+
+                    char* label_index = new char[20];
+
+                    _itoa(IF_COUNTER, label_index, 10);
+                    strcat(buffer, label_index);
+                    strcat(buffer, "\n");
+
+                    if (Rroot(start_root)->get_data_type() == BINDER)
+                    {
+                        get_asm_text_by_lines(Rroot(start_root), buffer);
+                    }
+                    else
+                    {
+                        get_asm_text(Rroot(start_root), buffer);
+                    }
+
+                    strcat(buffer, "\n\nEND_IF_");
+                    strcat(buffer, label_index);
+                    strcat(buffer, ":\n");
+
+                        IF_COUNTER++;
+
+                    delete[] label_index;
+                    break; 
+                }
+                default:
+                    printf("UNDEFINIED VALUE OF LOGICAL FUNCTION. Line: %d\n", __LINE__);
+                break;
+            }
+        }
         default:
+            printf("type = %d\n", GET_TYPE);
             PRINT_UNDEFINE_TYPE;
     }
 }
@@ -928,299 +1027,6 @@ void tree::print_subtree(tree_element* start_root, char* buffer)
             PRINT_UNDEFINE_TYPE;
             return;
     }
-    return;
-}
-
-void tree::make_article(const char* name_of_file)
-{
-    assert(this && "Can't do article without tree");
-
-    FILE* tex = fopen("main.tex", "wb");
-    assert(tex && "Can't open main.tex file");
-
-    tex_ = tex;
-
-    print_title(tex);
-    print_1_section(tex);
-    print_2_section(tex);
-
-    main_print(tex);
-
-    print_conclusion(tex);
-
-    print_used_books(tex);
-
-    fprintf(tex, "\\end{document}\n");
-
-    fclose(tex);
-
-    system("iconv.exe -t UTF-8 -f CP1251 < main.tex > temp_main.tex");
-    system("del main.tex");
-    system("ren temp_main.tex main.tex");
-
-    for (int i = 0; i < 2; i++)
-    {
-        system("pdflatex main.tex");
-    }
-     
-    char* delete_old_file = new char[50]{ 0 };
-    strcat(delete_old_file, "del ");
-    strcat(delete_old_file, name_of_file);
-    system(delete_old_file);
-    delete[] delete_old_file;
-
-    
-    char* sys1 = new char[60]{ 0 };
-
-    
-    strcat(sys1, "ren main.pdf ");
-    strcat(sys1, name_of_file);
-    system(sys1);
-
-    char* sys2 = new char[50]{ 0 };
-    strcat(sys2, "start ");
-    strcat(sys2, name_of_file);
-    system(sys2);
-
-    delete[] sys1;
-    delete[] sys2;
-    
-
-
-
-    return;
-
-}
-
-void tree::main_print(FILE* tex)
-{
-    assert(tex);
-
-    fprintf(tex, "\\section{Как вычислить производную в 2021 году}\n\n");
-
-    fprintf(tex, "Сейчас научим тупых греков считать прозводную на следующем примере:\n");
-
-    char* formula = get_formula(get_root());
-
-    fprintf(tex, formula);
-    delete[] formula;
-
-    fprintf(tex, "\n");
-
-
-    tree_element* new_tree_root = differenciate(get_root());
-
-    tree* new_tree = new tree;
-
-    new_tree->set_root(new_tree_root);
-    new_tree->objs_ = objs_;
-
-    new_tree->show_tree("diff_tree");
-
-
-    fprintf(tex, "После двух бессонных ночей, шести пачек вискаса и бутылки охоты крепкого"
-        " Мы получили примерно следующее:\n");
-
-    char* formula2 = new_tree->get_formula(new_tree->get_root());
-
-    fprintf(tex, formula2);
-    delete[] formula2;
-
-
-    fprintf(tex, "Но данное выражение какое-то некрасивое, поэтому давайте его преобразуем к следующему виду:\n");
-
-    new_tree->optimizer_number(new_tree->get_root());
-    new_tree->show_tree("lvl_1_of_optimization");
-
-
-    new_tree->optimizer_operator(new_tree->get_root());
-    new_tree->show_tree("lvl_2_of_optimization");
-    
-
-    new_tree->optimizer_operator(new_tree->get_root());
-    new_tree->optimizer_number(new_tree->get_root());
-    new_tree->show_tree("lvl_3_of_optimization");
-
-
-    char* formula3 = new_tree->get_formula(new_tree->get_root());
-
-    fprintf(tex, formula3);
-    delete[] formula3;
-
-    return;
-}
-
-void print_title(FILE* tex)
-{
-    assert(tex);
-
-    fprintf(tex, "\\documentclass[a4paper,12pt]{article} \n"
-        "\n"
-        "\n"
-        "\n"
-        "\\usepackage[utf8]{inputenc}\n"
-        "\\usepackage[english, russian]{babel}\n"
-        "\\usepackage{caption}\n"
-        "\\usepackage{listings}\n"
-        "\\usepackage{amsmath,amsfonts,amssymb,amsthm,mathtools }\n"
-        "\\usepackage{wasysym}\n"
-        "\\usepackage{graphicx}\n"
-        "\\usepackage{float} \n"
-        "\\usepackage{wrapfig} \n"
-        "\\usepackage{fancyhdr} \n"
-        "\\usepackage{lscape}\n"
-        "\\usepackage{xcolor}\n"
-        "\\usepackage[normalem]{ ulem }\n"
-        "\\usepackage{hyperref}\n"
-        "\n"
-        "\n"
-        "\n"
-        "\n"
-        "\n"
-        "\\hypersetup\n"
-        "{\n"
-        "    colorlinks = true,\n"
-        "    linkcolor = blue,\n"
-        "    filecolor = magenta,\n"
-        "    urlcolor = blue\n"
-        "}\n"
-        "\n"
-        "\n"
-        "\\pagestyle{fancy}\n"
-        "\\fancyhead{}\n"
-        "\\fancyhead[L]{ 2.2.8 }\n"
-        "\\fancyhead[R]{ Талашкевич Даниил, 2 положительная группа крови}\n"
-        "\\fancyfoot[C]{ \\thepage }\n"
-        "\n"
-        "\n"
-        "\n"
-        "\\begin{document}\n"
-        "\n"
-        "\n"
-        "\\begin{titlepage}\n"
-        "\n"
-        "\\newpage\n"
-        "\\begin{center}\n"
-        "\\normalsize Московский физико - технический институт //госудраственный университет)\n"
-        "\\end{center}\n"
-        "\n"
-        "\\vspace{6em}\n"
-        "\n"
-        "\\begin{center}\n"
-        "\\Large Домашняя работа по Физической культуре\\\\\n"
-        "\\end{center}\n"
-        "\n"
-        "\\vspace{1em}\n"
-        "\n"
-        "\\begin{center}\n"
-        "\\large \\textbf{ Исследование термических эффектов,\n"
-        "возникающих при упругих деформациях[2.2.8] }\n"
-        "\\end{center}\n"
-        "\n"
-        "\\vspace{2em}\n"
-        "\n"
-        "\\begin{center}\n"
-        "\\large П$ ^ 3$ : Полная Полтрашка Патриковна и Талашкевич Даниил Александрович \\\\\n"
-        "Группа Б01 - \\href{ https://vk.com/rt_kiska }{\\textbf{Гладим киску каждый день}}\n"
-        "\\end{center}\n"
-        "\n"
-        "\\vspace{\\fill}\n"
-        "\n"
-        "\\begin{center}\n"
-        "    \\large Иерусалим \\\\ 2 век до н.э.\n"
-        "\\end{center}\n"
-        "\n"
-        "\\end{titlepage}\n"
-        "\n"
-        "\n"
-        "\n"
-        "    \\thispagestyle{empty}\n"
-        "    \\newpage\n"
-        "    \\tableofcontents\n"
-        "    \\newpage\n"
-        "    \\setcounter{page}{1}\n"
-        "\n"
-        "\n");
-
-
-    return;
-}
-
-void print_1_section(FILE* tex)
-{
-    assert(tex);
-
-    fprintf(tex, "\\section{Введение в историю Иерусалима}\n\n"
-        "Древнейшая часть Иерусалима была заселена в 4-м тысячелетии до н.э.,"
-        " что делает его одним из древнейших городов мира. За свою долгую историю,"
-        " Иерусалим был как минимум дважды разрушен, 23 раза осаждён, 52 раза атакован"
-        " и 44 раза завоёван либо вновь отвоёван.\n\nВ разное время городом владели Израильское царство,"
-        " Иудейское царство, Вавилон, Персидская империя и империя Александра Македонского, Египет Птолемеев,"
-        " Сирия Селевкидов. После еврейского восстания во II веке до н.э. на некоторое время было восстановлено"
-        " Иудейское Царство, но уже в 6 году н.э. на месте него была провозглашена римская провинция Иудея."
-        " Вслед за распадом Римской империи, Иерусалим отошёл к Византии. После Византии город принадлежал"
-        " арабским халифатам, крестоносцам, государствам Айюбидов и мамлюков, Османской и затем Британской"
-        " империям, Иордании и, наконец, Израилю.\n\n Учитывая центральное место, отводимое Иерусалиму как"
-        " еврейским, так и палестинским национализмом, на избирательность, неизбежную при"
-        " резюмировании более чем 5000 - летней истории его населённости, часто накладывается идеологическая"
-        " предвзятость или предшествующий опыт авторов.Еврейские периоды истории города важны для израильских"
-        " националистов, дискурс которых предполагает, что современные евреи происходят от израэлитов и"
-        " Маккавеев в то время как исламский, христианский и другие нееврейские периоды его истории важны"
-        " для палестинского национализма, дискурс которого производит современных палестинцев от всех"
-        " разнообразных народов, населявших регион. В результате каждая из сторон утверждает, что история"
-        " города была политизирована оппонентами, дабы подкрепить притязания последних на город, и что это"
-        " подтверждается разностью акцентов, придаваемых различными авторами разнообразным событиям и эрам в истории города.\n\n");
-
-
-    return;
-}
-
-void print_2_section(FILE* tex)
-{
-    assert(tex);
-
-    fprintf(tex, "\\section{Как древние греки считали производные}\n"
-        "Для того, чтобы вычислять производную греки поступили очень умно :"
-        " они построили машину времени, переместились в 2021 год н.э., затем"
-        " на крысичях украли мой \\textbf{exe}-шник и данную статью с подробнейшим"
-        " описанием как искать ее в 2021 году, затем вернулись обратно и сковозь долгие"
-        " годы они научились все - таки ее брать.Вы наверное подумаете, что это все чисто"
-        " воды обман и выдумка, но у меня есть на то доказательства : \\newpage\n"
-        "\n \\begin{figure}[h]\n"
-        " \\center{ \\includegraphics[scale = 1]{proof.jpg} }\n"
-        " \\label{ photo1:1 }\n"
-        " \\end{figure}\n\n"
-        " На данном фото видно, как они внаглую просто переписывают мой код!!!!"
-        " P.S.Фото взято из архивов национального музея наследний ЮНЕСКО\n\n");
-
-    return;
-}
-
-void print_conclusion(FILE* tex)
-{
-    assert(tex);
-
-    fprintf(tex, "\\section{Заключение}\n"
-        " При выполнение домашней работы по физической культуре"
-        " я узнал про историю Иерусалима, познакомился с тем,"
-        " как греки считали производные, а так же сам научился"
-        " считать производную по шагам!\n");
-
-    return;
-}
-
-void print_used_books(FILE* tex)
-{
-    assert(tex);
-
-    fprintf(tex, "\\section{Используемые тренажеры}\n"
-        " \\begin{enumerate}\n"
-        " \\item Скакалка\n"
-        " \\item Эскандер\n"
-        " \\item Крижометр (отдельное спасибо Крижовичу за то, что предоставил его мне!)\n"
-        " \\item Коксовая дорожка\n"
-        " \\end{enumerate}\n");
-
     return;
 }
 
@@ -1971,41 +1777,33 @@ tree_element* tree::fill_by_lines(tree_element* start_root, int& number_of_lines
 int tree::count_statements()
 {
     int num_of_statements = 0;
-    //printf("number of objects = %d\n", objs_->number_of_objects);
 
     for (int i = 0; i < objs_->number_of_objects; i++)
+    {
         if (objs_->obj[i].type_of_object == BLOCK_BRACKET)
         {
-            //printf("Block bracket on i = %d\n", i);
             int counter_of_block_brackets = 1;
             i++;
 
-            while (counter_of_block_brackets != 0)//(!((objs_->obj[i].type_of_object == BLOCK_BRACKET) && (objs_->obj[i].value == R_BRACKET_BLOCK_VAL)))
+            while (counter_of_block_brackets != 0)
             {
-                if ((objs_->obj[i].type_of_object == BLOCK_BRACKET) && (objs_->obj[i].value == R_BRACKET_BLOCK_VAL))
-                {
-                    //printf("find R on i = %d\n", i);
+                if (IS_R_B_BRACKET(i))
                     counter_of_block_brackets--;
-                    //num_of_statements++;
-                }
-                else if ((objs_->obj[i].type_of_object == BLOCK_BRACKET) && (objs_->obj[i].value == L_BRACKET_BLOCK_VAL))
-                {
-                   // printf("find L on i = %d\n", i);
+                else if (IS_L_B_BRACKET(i))
                     counter_of_block_brackets++;
-                }
+
                 i++;
             }
-            //i--;
-            //printf("end on i = %d\n", i);
 
             num_of_statements++;
         }
-        else 
+        else
+        {
             if (objs_->obj[i].type_of_object == END_OF_LINE)
                 num_of_statements++;
-
-    //printf("num of statements = %d\n", num_of_statements);
-
+        }
+    }
+    
     return num_of_statements;
 }
 
@@ -2016,23 +1814,17 @@ void tree::fill_tree(struct Objects* main_object, bool need_print)
 
     objs_ = main_object;
    
-    int number_of_statements = count_statements();//objs_->number_of_lines;
+    int number_of_statements = count_statements();
     objs_->number_of_statements = number_of_statements;
-    //printf("Number of lines is %lu\n", objs_->number_of_lines);
     
     printf("statements = %d\n", number_of_statements);
 
     if (number_of_statements == 0)
         printf("0 lines in text.txt\nLeave..\n");
-
     else if (number_of_statements == 1)
-    {
-        root_ = get_statement();//get_block();//get_statement();
-    }
+        root_ = get_statement();        //get_block();//get_statement();
     else
-    {
         root_ = fill_by_lines(root_);
-    }
         
     objs_->number_of_statements = number_of_statements;//objs_->number_of_lines = number_of_lines;
 
@@ -2098,6 +1890,8 @@ const char* get_value_of_object(struct Objects* objs, struct Object* obj)
                 return "<";
             case OP_ABOVE_VAL:
                 return ">";
+            case OP_IS_EQUAL_VAL:
+                return "==";
             case SIN_VAL:
                 return "sin";
             case COS_VAL:
@@ -2125,65 +1919,52 @@ tree_element* tree::get_block()
 {
     tree_element* result = nullptr;
 
-    //int start_number_of_lines = objs_->obj[cur_size_].value;
-
     if (objs_->obj[cur_size_].type_of_object != BLOCK_BRACKET)
     {
-        printf("here\n");
-        //cur_size_ ++; //MAYBE??
-        return get_statement();//result = get_statement();
-        //cur_size_++;
+        return get_statement();
+        //cur_size_++; // BECAUSE WE NEED TO take into consideration absence of '{}'
     }
-    else if (objs_->obj[cur_size_].value != L_BRACKET_BLOCK_VAL)
+    else if (!IS_L_B_BRACKET(cur_size_)) //(objs_->obj[cur_size_].value != L_BRACKET_BLOCK_VAL)
     {
         printf("ERROR IN BRACKET. LEave..\n");
         return nullptr;
     }
     else
     {
-        cur_size_++; // from '{' to next element
+        cur_size_++;  // from '{' to next element
 
         int true_lines = 0;
         int tmp_cur_size = cur_size_;
 
         int bracket_counter = 1;
 
-        while (bracket_counter != 0)//(objs_->obj[tmp_cur_size].value != R_BRACKET_BLOCK_VAL)
+        while (bracket_counter != 0)              
         {
-            if ((objs_->obj[tmp_cur_size].type_of_object == BLOCK_BRACKET) && (objs_->obj[tmp_cur_size].value == R_BRACKET_BLOCK_VAL))
-            {
-               // printf("find R on i = %d\n", i);
+            if (IS_R_B_BRACKET(tmp_cur_size))
                 bracket_counter--;
-                //num_of_statements++;
-            }
-            else if ((objs_->obj[tmp_cur_size].type_of_object == BLOCK_BRACKET) && (objs_->obj[tmp_cur_size].value == L_BRACKET_BLOCK_VAL))
-            {
-                //printf("find L on i = %d\n", i);
+
+            else if (IS_L_B_BRACKET(tmp_cur_size))
                 bracket_counter++;
-            }
+
 
             if ((objs_->obj[tmp_cur_size].type_of_object == END_OF_LINE) && (objs_->obj[tmp_cur_size].value == END_OF_LINE_VAL))
             {
                 true_lines++;
                 tmp_cur_size++;
             }
-
-            else tmp_cur_size++;
+            else 
+                tmp_cur_size++;
         }
 
-        printf("true_lines = %d\n", true_lines);
         int start_number_of_lines = true_lines;
 
         if (true_lines > 1) 
         {
-            //printf("MORE THAN 1 LINE!\n");
             int number_of_lines = true_lines;
 
             if (number_of_lines > 2)
             {
                 tree_element* right_subtree = get_statement();
-                //cur_size_--;// temporarily
-
                 number_of_lines--;
 
                 tree_element* left_subtree = nullptr;
@@ -2197,18 +1978,181 @@ tree_element* tree::get_block()
                 tree_element* left_subtree = get_statement();
                 result = create_root(create_object(BINDER, start_number_of_lines), left_subtree, right_subtree);
             }
-                //printf("LOGIC ERROR(SIMPLE FIX, I KNOW HOW TO DO THIS) line: %d\n", __LINE__);
 
             return result;
         }
         else
-        {
-            /*tree_element* right_subtree = get_statement();
-            tree_element* left_subtree = get_statement();
-            result = create_root(create_object(BINDER, start_number_of_lines), left_subtree, right_subtree);*/
             result = get_statement();
-        }
+ 
     }
+}
+
+tree_element* tree::get_logic()
+{
+    tree_element* left_part_of_logic = nullptr;
+
+    if (objs_->obj[cur_size_].type_of_object == BRACKET)
+    {
+        cur_size_++;
+
+        left_part_of_logic = get_part_of_logic();
+        
+        if (objs_->obj[cur_size_].type_of_object == BRACKET)
+        {
+            cur_size_++;
+            return left_part_of_logic;
+        }
+
+        Object* logic_element = create_object(objs_->obj[cur_size_].type_of_object, objs_->obj[cur_size_].value);
+        cur_size_++;
+
+        tree_element* logic_result = create_root(logic_element, left_part_of_logic, get_part_of_logic());
+
+        if (objs_->obj[cur_size_].type_of_object != BRACKET)
+            printf("ERROR BRACKETS IN GET_LOGIC!! WARNING!!!!\n");
+        else
+            cur_size_++; // skip ')'
+
+        return logic_result; //return left_part_of_logic;
+    }
+    else
+    {
+        printf("ERROR: NEED BRACKETS IN LOGIC. line: %d\n", __LINE__);
+        return nullptr;
+    }
+
+}
+
+tree_element* tree::get_part_of_logic()
+{
+    tree_element* tmp_element_1 = nullptr;
+
+    if ((objs_->obj[cur_size_].type_of_object == OPERATOR) && ((objs_->obj[cur_size_].value == OP_MIN_VAL) || (objs_->obj[cur_size_].value == OP_PLUS_VAL)))
+    {
+        if (objs_->obj[cur_size_].value == OP_MIN_VAL)
+        {
+            cur_size_++;
+            tmp_element_1 = MULTIPLY(CR_NUMBER(-1), get_operator());
+        }
+        else
+        {
+            cur_size_++;
+            tmp_element_1 = get_operator(); //ADDITION(get_operator(), get_operator());
+        }
+
+    }
+    else
+    {
+        tmp_element_1 = get_operator();
+    }
+
+    if (cur_size_ >= objs_->number_of_objects)
+        return tmp_element_1;
+
+    tree_element* tmp_element = new tree_element;
+
+    do
+    {
+        if (objs_->obj[cur_size_].type_of_object == BRACKET)
+        {
+            if (objs_->obj[cur_size_].value == R_BRACKET_VAL)
+            {
+                if ((tmp_element->get_left() == nullptr) && (tmp_element->get_right() == nullptr))
+                {
+                    tmp_element = tmp_element_1;
+                    return tmp_element;
+                }
+                else
+                {
+                    return tmp_element;
+                }
+            }
+            else
+            {
+                printf("BAD BRACKETS in get_express\n");
+                return nullptr;
+            }
+        }
+        else if (objs_->obj[cur_size_].type_of_object == END_OF_LINE)
+        {
+            if ((tmp_element->get_left() == nullptr) && (tmp_element->get_right() == nullptr))
+            {
+                tmp_element = tmp_element_1;
+                return tmp_element;
+            }
+            else
+            {
+                return tmp_element;
+            }
+        }
+        else if (objs_->obj[cur_size_].type_of_object == LOGICAL_OPERATOR)
+        {
+            if ((tmp_element->get_left() == nullptr) && (tmp_element->get_right() == nullptr))
+            {
+                tmp_element = tmp_element_1;
+                return tmp_element;
+            }
+            else
+            {
+                return tmp_element;
+            }
+        }
+
+        if ((objs_->obj[cur_size_].type_of_object == OPERATOR) && ((objs_->obj[cur_size_].value == OP_MIN_VAL) || (objs_->obj[cur_size_].value == OP_PLUS_VAL)))
+        {
+            if ((tmp_element->get_left() != nullptr) && (tmp_element->get_right() != nullptr))
+            {
+                tree_element* new_tmp_element = new tree_element;
+
+                new_tmp_element->set_data(&(objs_->obj[cur_size_]));
+
+                new_tmp_element->set_left(tmp_element);
+                tmp_element->set_prev(new_tmp_element);
+
+                tree_element* tmp_element_2 = nullptr;
+
+                cur_size_++;
+
+                tmp_element_2 = get_operator();
+
+                new_tmp_element->set_right(tmp_element_2);
+                tmp_element_2->set_prev(new_tmp_element);
+
+                tree_element* swap = tmp_element;
+                tmp_element = new_tmp_element;
+                new_tmp_element = swap;
+            }
+            else if ((tmp_element->get_left() == nullptr) && (tmp_element->get_right() == nullptr))
+            {
+                tmp_element->set_data(&(objs_->obj[cur_size_]));
+
+                tmp_element->set_left(tmp_element_1);
+                tmp_element_1->set_prev(tmp_element);
+
+                cur_size_++;
+                tree_element* tmp_element_2 = nullptr;
+                tmp_element_2 = get_operator();
+
+                tmp_element->set_right(tmp_element_2);
+                tmp_element_2->set_prev(tmp_element);
+
+            }
+            else
+            {
+                printf("I HAVE BAD LOGIC(((\n");
+            }
+        }
+        else
+        {
+            printf("NEED cur_size_++, cur_size_ = %d\n", cur_size_);
+            printf("type = %d\nvalue = %d\n", objs_->obj[cur_size_].type_of_object, objs_->obj[cur_size_].value);
+            break;
+        }
+
+
+    } while ((IS_PLUS_OR_MIN()) && !(objs_->obj[cur_size_].type_of_object == END_OF_LINE) && !(IS_LOGIC_OP));
+
+    return tmp_element;
 }
 
 tree_element* tree::get_statement()
@@ -2217,16 +2161,24 @@ tree_element* tree::get_statement()
     if ((objs_->obj[cur_size_].type_of_object == LOGICAL_FUNCTION) && (objs_->obj[cur_size_].value == IF_VAL))
     {
         cur_size_++;
-        tree_element* if_argument = get_bracket();
+        tree_element* if_argument = get_logic();//get_bracket(); // get_logic()
+        
+        tree_element* if_block = nullptr;
+        if ((objs_->obj[cur_size_].type_of_object == BLOCK_BRACKET) && (objs_->obj[cur_size_].value == L_BRACKET_BLOCK_VAL))
+            if_block = get_block();
+        else
+        {
+            if_block = get_statement();
+            cur_size_--; // because next we well do cur_size_++ and we need TO NEUTRALIZE this because we haven't '{}'
+        }
 
-        tree_element* if_block    = get_block();
         result = create_root(create_object(LOGICAL_FUNCTION, IF_VAL), if_argument, if_block);
         
-        cur_size_++; // MAYBE += 2 !!!!!!
+        cur_size_++; // MAYBE += 2 !!!!!! <-- 90% probability NOT
         return result;
     }
 
-    tree_element* tmp_element_1 = get_number();//get_expression(); // x
+    tree_element* tmp_element_1 = get_number(); //get_expression();
 
 
     if ((objs_->obj[cur_size_].type_of_object == OPERATOR) && (objs_->obj[cur_size_].value == OP_EQUAL_VAL))
@@ -2305,6 +2257,7 @@ tree_element* tree::get_expression()
                 return tmp_element;
             }
         }
+
 
         if ((objs_->obj[cur_size_].type_of_object == OPERATOR) && ((objs_->obj[cur_size_].value == OP_MIN_VAL) || (objs_->obj[cur_size_].value == OP_PLUS_VAL)))
         {            
