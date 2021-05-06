@@ -1,3 +1,0 @@
-	Data of DUMP in Assembler : 01.05.2021 20:41:47, суббота (dd/mm/yy)
-
-Assem ended without any errors
