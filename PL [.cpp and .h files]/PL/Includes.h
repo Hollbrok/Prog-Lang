@@ -2,20 +2,16 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <cstdio>
 #include <windows.h>
-//#include <wchar.h>
-#include <stdlib.h>
-#include <string.h>
 #include <conio.h>
 #include <ctype.h>
-#include <string.h>
 #include <assert.h>
 #include <time.h>
 #include <stddef.h>
 #include <string> 
-#include <stdlib.h>
 
 
 constexpr int NUMBER_OF_VARIABLES = 10;

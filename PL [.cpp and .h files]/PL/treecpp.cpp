@@ -150,6 +150,22 @@ bool is_free_objs = false;
         strcat(buffer, "\\right)");                                                                                             \
     }
 
+void tree::create_asm_text_file(bool need_debug)
+{
+    char* asm_text_buf = make_assem_text();
+
+    FILE* asm_text_file = fopen("user_code[for_user].asm", "wb");
+    assert(asm_text_file);
+
+    if(need_debug)
+        printf("Asm text buffer:\n"
+               "[%s]\n", asm_text_buf);
+
+    fwrite(asm_text_buf, sizeof(char), strlen(asm_text_buf), asm_text_file);
+
+    fclose(asm_text_file);
+}
+
 int tree::count_num_of_lines(tree_element* start_root)
 {
     int counter = 0;

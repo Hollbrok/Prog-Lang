@@ -1,7 +1,5 @@
 #include "PL_func.h"
 
-//_CRT_SECURE_NO_WARNINGS
-
 struct Objects* fill_structures(FILE* text)
 {
 	assert(text && "Nullptr file in fill_structures");

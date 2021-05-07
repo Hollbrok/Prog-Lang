@@ -170,6 +170,8 @@ public:
 
 	int calculate(tree_element* start_root);
 	int get_number(tree_element* start_root);
+
+	void create_asm_text_file(bool need_debug = false);
 };
 
 
