@@ -1,0 +1,4 @@
+	Data of DUMP in CPU : 07.05.2021 23:40:51, Friday (dd/mm/yy)
+
+CPU ended without any errors
+Stack is empty
