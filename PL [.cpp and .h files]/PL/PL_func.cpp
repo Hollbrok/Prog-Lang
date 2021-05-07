@@ -124,6 +124,13 @@ struct Objects* fill_structures(FILE* text)
 
 			i += 2 - 1;
 		}
+		else if (!strncmp(&buffer[i], "main", 4))
+		{
+			obj[obj_counter].type_of_object = MAIN_FUNCTION;
+			obj[obj_counter++].value = MAIN_VAL;
+
+			i += 4 - 1;
+		}
 		else if (!strncmp(&buffer[i], "print", 5))
 		{
 			obj[obj_counter].type_of_object = ARITHMETIC_FUNCTION;

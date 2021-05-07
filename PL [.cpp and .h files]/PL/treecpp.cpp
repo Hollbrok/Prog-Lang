@@ -200,9 +200,7 @@ void tree::get_asm_text_by_lines(tree_element* start_root, char* buffer)
 
     else // last string
     {
-        //get_asm_text(start_root, buffer);
         get_asm_text(Rroot(start_root), buffer);
-        //objs_->number_of_statements--;
         strcat(buffer, "\n");
         get_asm_text(Lroot(start_root), buffer);
     }
@@ -214,14 +212,29 @@ char* tree::make_assem_text()
 {
     char* buffer = new char[MAX_ASMFILE_SIZE] {0};
 
-    int number_of_statements = objs_->number_of_statements;
+    int number_of_statements = 0; //objs_->number_of_statements;
+    //printf("statements = %d\n", number_of_statements);
+
+    if (root_->data_->type_of_object == MAIN_FUNCTION)
+    {
+        objs_->number_of_statements = Rroot(root_)->data_->value;
+        number_of_statements = objs_->number_of_statements;
+    }
+    else
+    {
+        printf("NO MAIN FUNCTION. Leave..\n");
+        strcpy(buffer, "ERROR");
+        return buffer;
+    }
+
+    //printf("STATEMENTS = %d\n", number_of_statements);
 
     if (number_of_statements == 0)
         printf("0 lines in text.txt\nLeave..\n");
     else if (number_of_statements == 1)
-        get_asm_text(root_, buffer);
+        get_asm_text(Rroot(root_), buffer);
     else
-        get_asm_text_by_lines(root_, buffer);
+        get_asm_text_by_lines(Rroot(root_), buffer);
 
     objs_->number_of_statements = number_of_statements;
 
@@ -414,6 +427,15 @@ void tree::get_asm_text(tree_element* start_root,char* buffer)
                     printf("UNDEFINIED VALUE OF LOGICAL FUNCTION. Line: %d\n", __LINE__);
                 break;
             }
+            break;
+        }
+        case MAIN_FUNCTION:
+        {
+            if (Lroot(start_root))
+                printf("Language doesn't support argument in main()\n");
+            else 
+                get_asm_text_by_lines(Rroot(start_root), buffer);
+
             break;
         }
         default:
@@ -1919,7 +1941,7 @@ void tree::fill_tree(struct Objects* main_object, bool need_print)
     int number_of_statements = count_statements();
     objs_->number_of_statements = number_of_statements;
     
-    printf("statements = %d\n", number_of_statements);
+    //printf("statements = %d\n", number_of_statements);
 
     if (number_of_statements == 0)
         printf("0 lines in text.txt\nLeave..\n");
@@ -2010,6 +2032,8 @@ const char* get_value_of_object(struct Objects* objs, struct Object* obj)
                 return "while";
             case PRINT_VAL:
                 return "print";
+            case MAIN_VAL:
+                return "main";
             case FOR_VAL:
                 return "for";
             default:
@@ -2044,22 +2068,42 @@ tree_element* tree::get_block()
 
         while (bracket_counter != 0)              
         {
-            if (IS_R_B_BRACKET(tmp_cur_size))
+            /*if (IS_R_B_BRACKET(tmp_cur_size))
+            {
+                printf("-");
                 bracket_counter--;
-
+            }
             else if (IS_L_B_BRACKET(tmp_cur_size))
+            {
+                printf("+");
                 bracket_counter++;
+            }*/
+
+            if (IS_R_B_BRACKET(tmp_cur_size))
+            {
+                //printf("-");
+                bracket_counter--;
+            }
+            else if (IS_L_B_BRACKET(tmp_cur_size))
+            {
+                while (!(IS_R_B_BRACKET(tmp_cur_size)))
+                    tmp_cur_size++;
+
+                true_lines++;
+                //printf("2.statements++ (tmp_cur_size = %d)\n", tmp_cur_size);
+            }
 
 
             if ((objs_->obj[tmp_cur_size].type_of_object == END_OF_LINE) && (objs_->obj[tmp_cur_size].value == END_OF_LINE_VAL))
             {
+                //printf("1.statements++ (tmp_cur_size = %d)\n", tmp_cur_size);
                 true_lines++;
-                tmp_cur_size++;
             }
-            else 
-                tmp_cur_size++;
-        }
+            tmp_cur_size++;
 
+        }
+        
+        //printf("number of statements = %d\n", true_lines);
         int start_number_of_lines = true_lines;
 
         if (true_lines > 1) 
@@ -2262,6 +2306,7 @@ tree_element* tree::get_part_of_logic()
 tree_element* tree::get_statement()
 {
     tree_element* result = nullptr;
+
     if ( (objs_->obj[cur_size_].type_of_object == LOGICAL_FUNCTION) && ( (objs_->obj[cur_size_].value == IF_VAL) || (objs_->obj[cur_size_].value == WHILE_VAL) ) )
     {
         Object* logic_type = create_object(LOGICAL_FUNCTION, objs_->obj[cur_size_].value);
@@ -2282,6 +2327,29 @@ tree_element* tree::get_statement()
         
         cur_size_++; // MAYBE += 2 !!!!!! <-- 90% probability NOT
         return result;
+    }
+    else if ( (objs_->obj[cur_size_].type_of_object == MAIN_FUNCTION) && (objs_->obj[cur_size_].value == MAIN_VAL) )
+    {
+        //printf("HERE\n");
+        Object* main_obj = create_object(MAIN_FUNCTION, MAIN_VAL);
+
+        cur_size_++;
+
+        if ((objs_->obj[cur_size_ + 1].type_of_object == BRACKET) && (objs_->obj[cur_size_ + 1].value == R_BRACKET_VAL))
+        {
+            cur_size_ += 1 + 1;
+            //printf("CUR_OBJECT TYPE = %d\n", objs_->obj[cur_size_].type_of_object);
+            tree_element* main_block = get_block();
+            tree_element* result = create_root(main_obj, nullptr, main_block);
+            return result;
+        }
+
+        printf("BAD HERE\n");
+        tree_element* main_arg = get_bracket();
+        tree_element* main_block = get_block();
+        tree_element* result = create_root(main_obj, main_arg, main_block);
+        return result;
+
     }
     else if ((objs_->obj[cur_size_].type_of_object == ARITHMETIC_FUNCTION) && (objs_->obj[cur_size_].value == PRINT_VAL))
     {

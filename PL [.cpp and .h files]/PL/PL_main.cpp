@@ -1,7 +1,7 @@
 #include "tree.h"
 #include "PL_func.h"
 
-const bool DEBUG_STATE = false;
+const bool DEBUG_STATE = false;//false;
 
 int main()
 {
@@ -27,6 +27,7 @@ int main()
 	PL_tree.create_asm_text_file(DEBUG_STATE);
 
 	printf("DONE!\n");
+	system("Pause");
 
 	return 0;
 }

@@ -57,12 +57,19 @@ enum TYPES
 	USER_FUNCTION		= 6, 
 	LOGICAL_FUNCTION	= 7, // enum
 	LOGICAL_OPERATOR	= 8, // enum
+	
+	MAIN_FUNCTION       = 99,
 
 	BINDER		= 9,		 // just number but with special meaning
 	END_OF_LINE = 10,		 // enum
 
 
 	BLOCK_BRACKET = 13, //!!! MAYBE I NEED TO DO 13 instead of 3, но придется возможно усложнить get_bracket или написать get_block
+};
+
+enum MAIN_VALUES
+{
+	MAIN_VAL = 99,
 };
 
 enum BRACKET_VALUES // [0 - 3]
