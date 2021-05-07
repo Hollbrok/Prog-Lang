@@ -126,6 +126,20 @@ struct Objects* fill_structures(FILE* text)
 
 			i += 2 - 1;
 		}
+		else if (!strncmp(&buffer[i], "print", 5))
+		{
+			obj[obj_counter].type_of_object = ARITHMETIC_FUNCTION;
+			obj[obj_counter++].value = PRINT_VAL;
+
+			i += 5 - 1;
+		}
+		else if (!strncmp(&buffer[i], "while", 5))
+		{
+			obj[obj_counter].type_of_object = LOGICAL_FUNCTION;
+			obj[obj_counter++].value = WHILE_VAL;
+
+			i += 5 - 1;
+		}
 		else if (!strncmp(&buffer[i], "ln", 2))
 		{
 			obj[obj_counter].type_of_object = ARITHMETIC_FUNCTION;

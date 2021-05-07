@@ -15,10 +15,10 @@ int main()
 	Objects* objs = fill_structures(text);
 	tree PL_tree("PL_TREE");
 
-	//print_objects(objs);
+	print_objects(objs);
 
-	PL_tree.fill_tree(objs, true);
-	//PL_tree.show_tree();
+	PL_tree.fill_tree(objs);
+	PL_tree.show_tree();
 
 	char* asm_text_buf = PL_tree.make_assem_text();
 	
@@ -29,7 +29,8 @@ int main()
 	
 	printf("[%s]\n", asm_text_buf);
 	//dif_tree.make_article();
-
+	
 	printf("DONE!\n");
+	//system("PAUSE");
 	return 0;
 }

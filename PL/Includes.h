@@ -115,6 +115,7 @@ enum ARITH_FUTIONS_VALUES // [10-19]
 	CTG_VAL			= 14,
 	SH_VAL			= 15,
 	CH_VAL			= 16,
+	PRINT_VAL		= 17,
 };
 
 enum NUMBER_CONSTANTS // [20-29]

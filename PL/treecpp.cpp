@@ -5,6 +5,8 @@ const double exp_value = 2.7182818284;
 int FORMULA_COUNTER = 1;
 
 int IF_COUNTER = 0;
+int WHILE_COUNTER = 0;
+
 int LOGIC_COUNTER = 0;
 
 bool is_free_objs = false;
@@ -237,6 +239,23 @@ void tree::get_asm_text(tree_element* start_root,char* buffer)
                     strcat(buffer, "\n\tpush ");
                     get_asm_text(Rroot(start_root), buffer);
                     strcat(buffer, "\n\tadd\n");
+                    break;
+                }
+                case OP_MIN_VAL:
+                {
+                    get_asm_text(Lroot(start_root), buffer);
+                    strcat(buffer, "\n\tpush ");
+                    get_asm_text(Rroot(start_root), buffer);
+                    strcat(buffer, "\n\tsub\n");
+                    break;
+                }
+                case OP_TIMES_VAL:
+                {
+                    get_asm_text(Lroot(start_root), buffer);
+                    strcat(buffer, "\n\tpush ");
+                    get_asm_text(Rroot(start_root), buffer);
+                    strcat(buffer, "\n\tmul\n");
+                    break;
                 }
             }
             break;
@@ -261,11 +280,26 @@ void tree::get_asm_text(tree_element* start_root,char* buffer)
             break;
         }
         case ARITHMETIC_FUNCTION:
-            printf("Still need to add case ARITHMETIC_FUNCTION in get_asm_text");
+        {
+            switch (GET_VAL)
+            {
+                case PRINT_VAL:
+                    strcat(buffer, "\tpush ");
+                    get_asm_text(Lroot(start_root), buffer);
+                    strcat(buffer, "\n\tprint");
+                    break;
+                default:
+                    printf("UNKNOWN VALUE OF ARITHMETIC FUNCTION. Line: %d. Value = %d\n", __LINE__, GET_VAL);
+            }
+            
+            //printf("Still need to add case ARITHMETIC_FUNCTION in get_asm_text");
             break;
+        }
         case END_OF_LINE: // Вообще в дереве не должно быть ";"
+        {
             printf("LOGIC ERROR on line: %d\n", __LINE__);
             break;
+        }
         case LOGICAL_FUNCTION:
         {
             switch (GET_VAL)
@@ -309,10 +343,62 @@ void tree::get_asm_text(tree_element* start_root,char* buffer)
                     delete[] label_index;
                     break; 
                 }
+                case WHILE_VAL:
+                {
+                    char* label_index = new char[20];
+
+
+                    strcat(buffer, "\nSTART_WHILE_");
+                    _itoa(WHILE_COUNTER, label_index, 10);
+                    strcat(buffer, label_index);
+                    strcat(buffer, ":\n\n");
+
+
+                    strcat(buffer, "\tpush 0\n");
+                    if (Lroot(start_root)->get_data_type() == LOGICAL_OPERATOR)
+                    {
+                        printf("\tSTILL NEED TO ADD\n");
+                    }
+                    else
+                    {
+                        strcat(buffer, "\tpush ");
+                        get_asm_text(Lroot(start_root), buffer);
+                    }
+
+
+                    strcat(buffer, "\n\tje :END_WHILE_");
+
+                    _itoa(WHILE_COUNTER, label_index, 10);
+                    strcat(buffer, label_index);
+                    strcat(buffer, "\n");
+
+                    if (Rroot(start_root)->get_data_type() == BINDER)
+                    {
+                        get_asm_text_by_lines(Rroot(start_root), buffer);
+                    }
+                    else
+                    {
+                        get_asm_text(Rroot(start_root), buffer);
+                    }
+
+                    strcat(buffer, "\n\tjmp :START_WHILE_");
+                    strcat(buffer, label_index);
+                    strcat(buffer, "\n");
+                    
+                    strcat(buffer, "\n\nEND_WHILE_");
+                    strcat(buffer, label_index);
+                    strcat(buffer, ":\n");
+
+                    WHILE_COUNTER++;
+
+                    delete[] label_index;
+                    break;
+                }
                 default:
                     printf("UNDEFINIED VALUE OF LOGICAL FUNCTION. Line: %d\n", __LINE__);
                 break;
             }
+            break;
         }
         default:
             printf("type = %d\n", GET_TYPE);
@@ -1906,6 +1992,8 @@ const char* get_value_of_object(struct Objects* objs, struct Object* obj)
                 return "if";
             case WHILE_VAL:
                 return "while";
+            case PRINT_VAL:
+                return "print";
             case FOR_VAL:
                 return "for";
             default:
@@ -2158,23 +2246,34 @@ tree_element* tree::get_part_of_logic()
 tree_element* tree::get_statement()
 {
     tree_element* result = nullptr;
-    if ((objs_->obj[cur_size_].type_of_object == LOGICAL_FUNCTION) && (objs_->obj[cur_size_].value == IF_VAL))
+    if ( (objs_->obj[cur_size_].type_of_object == LOGICAL_FUNCTION) && ( (objs_->obj[cur_size_].value == IF_VAL) || (objs_->obj[cur_size_].value == WHILE_VAL) ) )
     {
+        Object* logic_type = create_object(LOGICAL_FUNCTION, objs_->obj[cur_size_].value);
         cur_size_++;
-        tree_element* if_argument = get_logic();//get_bracket(); // get_logic()
+
+        tree_element* logic_argument = get_logic();//get_bracket(); // get_logic()
         
-        tree_element* if_block = nullptr;
+        tree_element* logic_block = nullptr;
         if ((objs_->obj[cur_size_].type_of_object == BLOCK_BRACKET) && (objs_->obj[cur_size_].value == L_BRACKET_BLOCK_VAL))
-            if_block = get_block();
+            logic_block = get_block();
         else
         {
-            if_block = get_statement();
+            logic_block = get_statement();
             cur_size_--; // because next we well do cur_size_++ and we need TO NEUTRALIZE this because we haven't '{}'
         }
 
-        result = create_root(create_object(LOGICAL_FUNCTION, IF_VAL), if_argument, if_block);
+        result = create_root(logic_type, logic_argument, logic_block);
         
         cur_size_++; // MAYBE += 2 !!!!!! <-- 90% probability NOT
+        return result;
+    }
+    else if ((objs_->obj[cur_size_].type_of_object == ARITHMETIC_FUNCTION) && (objs_->obj[cur_size_].value == PRINT_VAL))
+    {
+        Object* print_obj = create_object(ARITHMETIC_FUNCTION, PRINT_VAL);
+        cur_size_++;
+
+        tree_element* print_arg = get_bracket();
+        result = create_root(print_obj, print_arg);
         return result;
     }
 
