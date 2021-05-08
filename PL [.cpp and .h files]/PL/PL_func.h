@@ -2,6 +2,8 @@
 
 #include "Includes.h"
 
+bool get_config();
+
 struct Objects* fill_structures(FILE* text);
 
 void print_objects(Objects* object);

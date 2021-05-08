@@ -1,4 +1,6 @@
-﻿#include "tree.h"
+﻿#pragma once
+
+#include "tree.h"
 
 const double exp_value = 2.7182818284;
 
@@ -453,9 +455,9 @@ const char* get_reg_type(int type)
         case 1:
             return "rbx";
         case 2:
-            return "rbx";
-        case 3:
             return "rcx";
+        case 3:
+            return "rdx";
         default:
             return "COCK_REGISTR";
     }
@@ -1581,17 +1583,17 @@ void tree::print_tree(bool need_graphviz_dump) const
 {
     if (need_graphviz_dump)
     {
-        graphviz_dump("dump.dot");
+        graphviz_dump("dump_for_me.dot");
 
-        system("iconv.exe -t UTF-8 -f  CP1251 < dump.dot > dump_temp.dot");
+        system("iconv.exe -t UTF-8 -f  CP1251 < dump_for_me.dot > dump_temp.dot");
        
-        system("dot dump_temp.dot -Tpdf -o dump.pdf");
+        system("dot dump_temp.dot -Tpdf -o dump_for_me.pdf");
        
-        system("del dump.dot");
+        system("del dump_for_me.dot");
       
-        system("ren dump_temp.dot dump.dot");
+        system("ren dump_temp.dot dump_for_me.dot");
  
-        system("dump.pdf");
+        system("dump_for_me.pdf");
 
     }
 
@@ -1607,7 +1609,7 @@ void tree::graphviz_dump(const char* dumpfile_name) const
 
     fprintf(dump, "digraph %s {\n", name_);
     fprintf(dump, "node [color = Red, fontname = Courier, style = filled, shape=record, fillcolor = purple]\n");
-    fprintf(dump, "edge [color = Blue, style=dashed]\n");
+    fprintf(dump, "edge [color = Blue, style=dashed]\n\n");
 
     //tree_element* tmp = root_;
 
@@ -1738,27 +1740,28 @@ void tree_element::print_elem(FILE* database)
 void print_all_elements(tree_element* tmp, FILE* dump, struct Objects* objs)
 {
     assert(tmp && "tmp is nullptr in print_all_elements");
-
     
     if (tmp->get_left())
     {
         print_all_elements(tmp->get_left(), dump, objs);
-        fprintf(dump, "\"%p\" -> \"%p\" [label=\"Left\", fontcolor=darkblue]\n", tmp, tmp->get_left());
+        fprintf(dump, "\"%p\" -> \"%p\" [label=\"Left\", fontcolor=darkblue]\n\n", tmp, tmp->get_left());
     }
     if (tmp->get_right())
     {
         print_all_elements(tmp->get_right(), dump, objs);
-        fprintf(dump, "\"%p\" -> \"%p\" [label=\"Right\", fontcolor=darkblue]\n", tmp, tmp->get_right());
+        fprintf(dump, "\"%p\" -> \"%p\" [label=\"Right\", fontcolor=darkblue]\n\n", tmp, tmp->get_right());
     }
+
+    printf("MAIN TYPE is %d\n", tmp->get_data()->type_of_object);
 
     if ((tmp->get_right() == nullptr) && (tmp->get_left() == nullptr))
     {
         if (tmp->get_prev() != nullptr)
         {
             if (tmp->get_data()->type_of_object != NUMBER)
-                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%s]}| {<f1> left| <here> prev| right}| {<f2> [%p]| [%p]| [%p]}\",style = filled, fillcolor = lightgreen] \n", tmp, get_type_of_object(tmp->data_->type_of_object), get_value_of_object(objs, tmp->get_data()), tmp->get_left(), tmp->get_prev(), tmp->get_right());
+                fprintf(dump, "\"%p\" [label = \"{ {<f0> TYPE = [%s] | <here> VALUE = [%s]} | PREV [%p] }\" , style = filled, fillcolor = lightgreen] \n", tmp, get_type_of_object(tmp->data_->type_of_object), get_value_of_object(objs, tmp->get_data()), tmp->get_prev());
             else
-                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%d]}| {<f1> left| <here> prev| right}| {<f2> [%p]| [%p]| [%p]}\",style = filled, fillcolor = lightgreen] \n", tmp, get_type_of_object(tmp->data_->type_of_object), tmp->get_data()->value, tmp->get_left(), tmp->get_prev(), tmp->get_right());
+                fprintf(dump, "\"%p\" [label = \"{ {<f0> TYPE = [%s] | <here> VALUE = [%d]} | PREV [%p] }\" , style = filled, fillcolor = lightgreen] \n", tmp, get_type_of_object(tmp->data_->type_of_object), tmp->get_data()->value, tmp->get_prev());
         }
         else
         {
@@ -1772,19 +1775,27 @@ void print_all_elements(tree_element* tmp, FILE* dump, struct Objects* objs)
     {
         if (tmp->get_prev() == nullptr)
         {
-            if (tmp->get_data()->type_of_object != NUMBER)
-                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%s]}| {<f1> left| right}| {<f2> [%p]| [%p]}\",style = filled, fillcolor = red] \n", tmp, get_type_of_object(tmp->data_->type_of_object), get_value_of_object(objs, tmp->get_data()), tmp->get_left(), tmp->get_right());
+            if (tmp->get_data()->type_of_object == NUMBER)
+                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%d]}| {<f1> left| right}| {<f2> [%p] | [%p]}\",style = filled, fillcolor = red] \n", tmp, get_type_of_object(tmp->data_->type_of_object), tmp->get_data()->value, tmp->get_left(), tmp->get_right());
+            else if (tmp->get_data()->type_of_object == BINDER)
+                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%d]}| {<f1> left| right}| {<f2> [%p] | [%p]}\",style = filled, fillcolor = \"#1F85DE\"] \n", tmp, get_type_of_object(tmp->data_->type_of_object), tmp->get_data()->value, tmp->get_left(), tmp->get_right());
             else
-                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%d]}| {<f1> left| right}| {<f2> [%p]| [%p]}\",style = filled, fillcolor = red] \n", tmp, get_type_of_object(tmp->data_->type_of_object), tmp->get_data()->value, tmp->get_left(), tmp->get_right());
+                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%s]}| {<f1> left| right}| {<f2> [%p] | [%p]}\",style = filled, fillcolor = red] \n", tmp, get_type_of_object(tmp->data_->type_of_object), get_value_of_object(objs, tmp->get_data()), tmp->get_left(), tmp->get_right());
         }
         else
         {
+            printf("HERE type is %d\n", tmp->get_data()->type_of_object);
+
             if ((tmp->get_data()->type_of_object == OPERATOR) && (tmp->get_data()->value == OP_TIMES_VAL))
-                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%s]}| {<f1> left| <here> prev| right}| {<f2> [%p]| [%p]| [%p]}\",style = filled, fillcolor = lightblue] \n", tmp, get_type_of_object(tmp->data_->type_of_object), get_value_of_object(objs, tmp->get_data()), tmp->get_left(), tmp->get_prev(), tmp->get_right());
-            else if (tmp->get_data()->type_of_object != NUMBER)
-                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%s]}| {<f1> left| <here> prev| right}| {<f2> [%p]| [%p]| [%p]}\",style = filled, fillcolor = purple] \n", tmp, get_type_of_object(tmp->data_->type_of_object), get_value_of_object(objs, tmp->get_data()), tmp->get_left(), tmp->get_prev(), tmp->get_right());
+                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%s]}| {<f1> left| <here> prev| right} | {<f2> [%p]| [%p]| [%p]}\",style = filled, fillcolor = lightblue] \n", tmp, get_type_of_object(tmp->data_->type_of_object), get_value_of_object(objs, tmp->get_data()), tmp->get_left(), tmp->get_prev(), tmp->get_right());
+            else if (tmp->get_data()->type_of_object == NUMBER)
+                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%d]}| {<f1> left| <here> prev| right} | {<f2> [%p]| [%p]| [%p]}\",style = filled, fillcolor = purple] \n", tmp, get_type_of_object(tmp->data_->type_of_object), tmp->get_data()->value, tmp->get_left(), tmp->get_prev(), tmp->get_right());
+            else if (tmp->get_data()->type_of_object == LOGICAL_FUNCTION)
+                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%s]}| {<f1> left| <here> prev| right} | {<f2> [%p]| [%p]| [%p]}\",style = filled, fillcolor = \"#fd02f4\"] \n", tmp, get_type_of_object(tmp->data_->type_of_object), get_value_of_object(objs, tmp->get_data()), tmp->get_left(), tmp->get_prev(), tmp->get_right());
+            else if (tmp->get_data()->type_of_object == BINDER)
+                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%d]}| {<f1> left| <here> prev| right}| {<f2>  [%p]| [%p]| [%p]}\",style = filled, fillcolor = \"#1F85DE\"] \n", tmp, get_type_of_object(tmp->data_->type_of_object), tmp->get_data()->value, tmp->get_left(), tmp->get_prev(), tmp->get_right());
             else
-                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%d]}| {<f1> left| <here> prev| right}| {<f2> [%p]| [%p]| [%p]}\",style = filled, fillcolor = purple] \n", tmp, get_type_of_object(tmp->data_->type_of_object), tmp->get_data()->value, tmp->get_left(), tmp->get_prev(), tmp->get_right());
+                fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%s]}| {<f1> left| <here> prev| right} | {<f2> [%p]| [%p]| [%p]}\",style = filled, fillcolor = purple] \n", tmp, get_type_of_object(tmp->data_->type_of_object), get_value_of_object(objs, tmp->get_data()), tmp->get_left(), tmp->get_prev(), tmp->get_right());
         }
     }
 
@@ -1952,8 +1963,9 @@ void tree::fill_tree(struct Objects* main_object, bool need_print)
         
     objs_->number_of_statements = number_of_statements;//objs_->number_of_lines = number_of_lines;
 
-    if(need_print)
-        show_tree("start_tree");
+    if (need_print)
+        print_tree();//show_tree("start_tree");
+        
     is_free_objs = false;
     return;
 }
@@ -1971,10 +1983,17 @@ const char* get_type_of_object(TYPE type)
         case VARIABLE:
             return "Variable";
         case ARITHMETIC_FUNCTION:
-            return "Function";
+            return "ARITHMETIC Function";
         case END_OF_LINE:
             return "END-LINE symbol";
-            break;
+        case BINDER:
+            return "BINDER";
+        case LOGICAL_OPERATOR:
+            return "LOGIC OP";
+        case LOGICAL_FUNCTION:
+            return "LOGIC function";
+        case MAIN_FUNCTION:
+            return "MAIN function";
         default:
             return "UNINDENTIFIED TYPE";
     }
@@ -1985,6 +2004,29 @@ const char* get_value_of_object(struct Objects* objs, struct Object* obj)
     if (obj->type_of_object == VARIABLE)
     {
         return objs->variables_names[obj->value];
+    }
+    else if (obj->type_of_object == BINDER)
+    {
+        switch (obj->value)
+        {
+            case 1:
+                return "1";
+            case 2:
+                return "2";
+            case 3:
+                return "3";
+            case 4:
+                return "4";
+            case 5:
+                return "5";
+            case 6:
+                return "6";
+            case 7:
+                return "7";
+            case 8:
+                return "8";
+
+        }
     }
     else
     {

@@ -1,4 +1,56 @@
+#pragma once
+
 #include "PL_func.h"
+
+bool MY_DEBUG_REGIME = false;
+
+
+bool get_config()
+{
+	FILE* config = fopen("PL_config.txt", "r");
+	assert(config);
+
+	char* buffer = make_buffer(config);
+
+	if (strlen(buffer) < 10)
+	{
+		printf("PL config is empty. DEBUG_REGIME set by default = false\n");
+		
+		fclose(config);
+
+		delete[] buffer;
+		
+		return false;
+	}
+
+	char* debug_str = strstr(buffer, "DEBUG");
+
+	if (debug_str == nullptr)
+		printf("Debug regime didn't set. DEBUG_REGIME set by default = false\n");
+	else
+	{
+		int new_start = debug_str - buffer + strlen("DEBUG\0") + 1;
+
+		while ((isspace(buffer[new_start])) || (buffer[new_start] == '='))
+			new_start++;
+
+		if (!strncmp(&buffer[new_start], "true", 4))
+			MY_DEBUG_REGIME = true;
+		else if (!strncmp(&buffer[new_start], "false", 5))
+			MY_DEBUG_REGIME = true;
+		else
+		{
+			printf("Debug regime didn't set. DEBUG_REGIME set by default = false\n");
+			MY_DEBUG_REGIME = false;
+		}
+	}
+
+	fclose(config);
+
+	delete[] buffer;
+
+	return MY_DEBUG_REGIME;
+}
 
 struct Objects* fill_structures(FILE* text)
 {
@@ -262,6 +314,9 @@ void print_objects(Objects* object)
 	{
 		switch (object->obj[i].type_of_object)
 		{
+		case MAIN_FUNCTION:
+			printf("%d. type is MAIN_FUNCTION, value is %d\n", i, object->obj[i].value);
+			break;
 		case OPERATOR:
 			printf("%d. type is OPERATOR, value is %d\n", i, object->obj[i].value);
 			break;
@@ -296,7 +351,7 @@ void print_objects(Objects* object)
 			printf("%d. type is BINDER, value is %d\n", i, object->obj[i].value);
 			break;
 		default:
-			printf("UNINDENTIFIED TYPE in print_objects\n");
+			printf("UNINDENTIFIED TYPE in print_objects. i = %d. TYPE = %d Line: %d\n", i, object->obj[i].type_of_object, __LINE__);
 			break;
 		}
 	}

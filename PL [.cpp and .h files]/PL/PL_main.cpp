@@ -1,10 +1,12 @@
+
 #include "tree.h"
 #include "PL_func.h"
 
-const bool DEBUG_STATE = false;//false;
 
 int main()
 {
+	bool MY_DEBUG_REGIME = get_config();
+
 	printf("Hello in my PL!\n");
 
 	SetConsoleCP(1251);
@@ -19,15 +21,17 @@ int main()
 
 	tree PL_tree("PL_TREE");
 
-	if(DEBUG_STATE)
-		print_objects(objs);
+	PL_tree.fill_tree(objs, MY_DEBUG_REGIME);
 
-	PL_tree.fill_tree(objs, DEBUG_STATE);
-
-	PL_tree.create_asm_text_file(DEBUG_STATE);
+	PL_tree.create_asm_text_file(MY_DEBUG_REGIME);
 
 	printf("DONE!\n");
-	system("Pause");
+	
+	if (MY_DEBUG_REGIME)
+	{
+		print_objects(objs);
+		system("Pause");
+	}
 
 	return 0;
 }
