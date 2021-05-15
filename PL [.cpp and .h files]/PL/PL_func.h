@@ -2,7 +2,7 @@
 
 #include "Includes.h"
 
-bool get_config();
+void get_config(bool& debug_regime, bool& beauty_regime);
 
 struct Objects* fill_structures(FILE* text);
 

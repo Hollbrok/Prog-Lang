@@ -2,31 +2,48 @@
 
 #include "PL_func.h"
 
-bool MY_DEBUG_REGIME = false;
+bool DEBUG_REGIME = false;
 
 
-bool get_config()
+void get_config(bool& debug_regime, bool& beauty_regime)
 {
 	FILE* config = fopen("PL_config.txt", "r");
-	assert(config);
+
+	if (config == nullptr)//assert(config);
+	{
+		printf("No config.  DEBUG_REGIME set by default = false.\n"
+			   "BEAUTY set by default = true.\n");
+
+		debug_regime = false;
+		beauty_regime = true;
+
+		return;
+	}
 
 	char* buffer = make_buffer(config);
 
 	if (strlen(buffer) < 10)
 	{
-		printf("PL config is empty. DEBUG_REGIME set by default = false\n");
-		
+		printf("No config.  DEBUG_REGIME set by default = false.\n"
+			"BEAUTY set by default = true.\n");
+
 		fclose(config);
 
 		delete[] buffer;
 		
-		return false;
+		debug_regime = false;
+		beauty_regime = true;
+
+		return;
 	}
 
 	char* debug_str = strstr(buffer, "DEBUG");
 
 	if (debug_str == nullptr)
+	{
 		printf("Debug regime didn't set. DEBUG_REGIME set by default = false\n");
+		debug_regime = false;
+	}
 	else
 	{
 		int new_start = debug_str - buffer + strlen("DEBUG\0") + 1;
@@ -35,21 +52,48 @@ bool get_config()
 			new_start++;
 
 		if (!strncmp(&buffer[new_start], "true", 4))
-			MY_DEBUG_REGIME = true;
+			debug_regime = true;
 		else if (!strncmp(&buffer[new_start], "false", 5))
-			MY_DEBUG_REGIME = true;
+			debug_regime = false;
 		else
 		{
 			printf("Debug regime didn't set. DEBUG_REGIME set by default = false\n");
-			MY_DEBUG_REGIME = false;
+			debug_regime = false;
 		}
 	}
+
+	char* beauty_str = strstr(buffer, "BEAUTY");
+
+	if (beauty_str == nullptr)
+	{
+		printf("Beauty regime didn't set. BEAUTY_REGIME set by default = true\n");
+		beauty_regime = true;
+	}
+	else
+	{
+		int new_start = beauty_str - buffer + strlen("BEAUTY\0") + 1;
+
+		while ((isspace(buffer[new_start])) || (buffer[new_start] == '='))
+			new_start++;
+
+		if (!strncmp(&buffer[new_start], "true", 4))
+			beauty_regime = true;
+		else if (!strncmp(&buffer[new_start], "false", 5))
+			beauty_regime = false;
+		else
+		{
+			printf("Beauty regime didn't set. BEAUTY_REGIME set by default = true\n");
+			beauty_regime = true;
+		}
+	}
+
+
 
 	fclose(config);
 
 	delete[] buffer;
 
-	return MY_DEBUG_REGIME;
+	return;
 }
 
 struct Objects* fill_structures(FILE* text)
@@ -264,7 +308,7 @@ struct Objects* fill_structures(FILE* text)
 			if (obj[obj_counter].value == -1)
 			{
 				obj[obj_counter].value = find_place(variables_names);
-				for (int counter = 0; counter < strlen(name); counter++)
+				for (size_t counter = 0; counter < strlen(name); counter++)
 					(variables_names[obj[obj_counter].value])[counter] = name[counter];
 			}
 			obj_counter++;
@@ -310,7 +354,7 @@ void print_objects(Objects* object)
 	assert(object && "U passed nullptr object to print_objects()");
 	printf("\n\n");
 
-	for (int i = 0; i < object->number_of_objects; i++)
+	for (size_t i = 0; i < object->number_of_objects; i++)
 	{
 		switch (object->obj[i].type_of_object)
 		{
@@ -412,23 +456,28 @@ int find_place(char* variables_names[NUMBER_OF_VARIABLES])
 
 void Objs_destructor(struct Objects* objs)
 {
-
 	if (objs)
 	{
 		delete[] objs->obj;
 		objs->obj = nullptr;
-	}
 
-	for (int i = 0; i < NUMBER_OF_VARIABLES; i++)
-	{
-		
-		if (objs->variables_names[i])
+
+		for (int i = 0; i < NUMBER_OF_VARIABLES; i++)
 		{
-			delete[] objs->variables_names[i];
-			objs->variables_names[i] = nullptr;
-		}
-	}
 
-	delete[] objs;
-	objs = nullptr;
+			if (objs->variables_names[i])
+			{
+				delete[] objs->variables_names[i];
+				objs->variables_names[i] = nullptr;
+			}
+		}
+
+		delete[] objs;
+		objs = nullptr;
+	}
+	else
+	{
+		printf("Objs didn't created");
+		return;
+	}
 }

@@ -13,6 +13,8 @@ int LOGIC_COUNTER = 0;
 
 bool is_free_objs = false;
 
+//------------------------------------------------------------------------------------------------------------
+
 #define IS_ARITHMETIC_FUNCTION(root)                            \
     (root->get_data_type() == ARITHMETIC_FUNCTION)
 
@@ -28,23 +30,14 @@ bool is_free_objs = false;
 #define IS_POW(root)                                            \
     ( (root->get_data_type() == OPERATOR) && (root->get_data_value() == OP_POW_VAL) )
 
+#define IS_EQUAL(root)                                          \
+    ( (root->get_data_type() == OPERATOR) && (root->get_data_value() == OP_EQUAL_VAL) )
+
 #define IS_MUL(root)                                            \
     ( (root->get_data_type() == OPERATOR) && (root->get_data_value() == OP_TIMES_VAL) )
 
 #define IS_DEL(root)                                            \
     ( (root->get_data_type() == OPERATOR) && (root->get_data_value() == OP_DEL_VAL) )
-
-#define IS_R_B_BRACKET(index)                                          \
-    (objs_->obj[index].type_of_object == BLOCK_BRACKET) && (objs_->obj[index].value == R_BRACKET_BLOCK_VAL)
-
-#define IS_L_B_BRACKET(index)                                          \
-    (objs_->obj[index].type_of_object == BLOCK_BRACKET) && (objs_->obj[index].value == L_BRACKET_BLOCK_VAL)
-
-#define IS_PLUS_OR_MIN()                                        \
-    (objs_->obj[cur_size_].type_of_object == OPERATOR) && ((objs_->obj[cur_size_].value == OP_MIN_VAL) || (objs_->obj[cur_size_].value == OP_PLUS_VAL))
-
-#define IS_LOGIC_OP                                             \
-    (objs_->obj[cur_size_].type_of_object == LOGICAL_OPERATOR) && ((objs_->obj[cur_size_].value == OP_IS_EQUAL_VAL) || (objs_->obj[cur_size_].value == OP_BELOW_VAL) || (objs_->obj[cur_size_].value == OP_ABOVE_VAL))
 
 #define L_AND_R_NULL(root)                                      \
     ( (root->get_left() == nullptr) && (root->get_right() == nullptr) )
@@ -58,6 +51,44 @@ bool is_free_objs = false;
 #define Rroot(root)                                             \
     root->get_right()
 
+
+//------------------------------------------------------------------------------------------------------------
+
+
+#define IS_R_B_BRACKET(index)                                          \
+    ( (objs_->obj[index].type_of_object == BLOCK_BRACKET) && (objs_->obj[index].value == R_BRACKET_BLOCK_VAL) )
+
+#define IS_L_B_BRACKET(index)                                          \
+    ( (objs_->obj[index].type_of_object == BLOCK_BRACKET) && (objs_->obj[index].value == L_BRACKET_BLOCK_VAL) )
+
+
+
+//------------------------------------------------------------------------------------------------------------
+
+#define IS_CUR_OBJECT_L_BLOCK_BRACKET                                   \
+    ( (objs_->obj[cur_size_].type_of_object == BLOCK_BRACKET) && (objs_->obj[cur_size_].value == L_BRACKET_BLOCK_VAL) )
+
+#define IS_CUR_OBJECT_R_BLOCK_BRACKET                                   \
+    ( (objs_->obj[cur_size_].type_of_object == BLOCK_BRACKET) && (objs_->obj[cur_size_].value == R_BRACKET_BLOCK_VAL) )
+
+#define IS_CUR_OBJECT_PLUS_OR_MIN                                       \
+    ( (objs_->obj[cur_size_].type_of_object == OPERATOR) && ( (objs_->obj[cur_size_].value == OP_MIN_VAL) || (objs_->obj[cur_size_].value == OP_PLUS_VAL) ) )
+
+#define IS_CUR_OBJECT_LOGIC_OP                                          \
+    ( (objs_->obj[cur_size_].type_of_object == LOGICAL_OPERATOR) && ( (objs_->obj[cur_size_].value == OP_IS_EQUAL_VAL) || (objs_->obj[cur_size_].value == OP_BELOW_VAL) || (objs_->obj[cur_size_].value == OP_ABOVE_VAL) ) )
+
+#define IS_CUR_OBJECT_EQUAL_OP                                          \
+    ( (objs_->obj[cur_size_].type_of_object == OPERATOR) && (objs_->obj[cur_size_].value == OP_EQUAL_VAL) )
+
+#define IS_CUR_OBJECT_END_OF_LINE                                       \
+    ( (objs_->obj[cur_size_].type_of_object == END_OF_LINE) && (objs_->obj[cur_size_].value == END_OF_LINE_VAL) )
+
+#define IS_CUR_OBJECT_LOGIC_FUNC                                        \
+    ( (objs_->obj[cur_size_].type_of_object == LOGICAL_FUNCTION) && ( (objs_->obj[cur_size_].value == IF_VAL) || (objs_->obj[cur_size_].value == WHILE_VAL) ) )
+
+
+//------------------------------------------------------------------------------------------------------------
+
 #define PRINT_UNDEFINE_OP_VALUE                                 \
     printf("Undefined OP value = [%s]\n", get_value_of_object(objs_, start_root->get_data()))
 
@@ -66,63 +97,6 @@ bool is_free_objs = false;
 
 #define PRINT_UNDEFINE_FUNC                                     \
     printf("Undefinied func = [%s]. Line: %d\n", get_value_of_object(objs_, start_root->get_data()), __LINE__)
-
-#define ADD_OR_SUB(obj, left, right)                            \
-    create_root(obj, left, right)
-
-#define ADDITION(left, right)                                   \
-    create_root(CR_ADD, left, right)
-
-#define MULTIPLY(left, right)                                   \
-    create_root(CR_MUL, left, right)
-
-#define EXPONENTIATION(left, right)                             \
-    create_root(CR_MUL, left, right)
-
-#define dR                                                      \
-    differenciate(Rroot(start_root))
-
-#define dL                                                      \
-    differenciate(Lroot(start_root))
-
-#define POWER()                                                 \
-    create_root()
-
-#define copyL                                                   \
-    copy_subtree(Lroot(start_root))
-
-#define copyR                                                   \
-    copy_subtree(Rroot(start_root))
-
-#define copyF                                                   \
-    copy_subtree(start_root)
-
-#define CR_LN                                                   \
-    create_object(ARITHMETIC_FUNCTION, LN_VAL)
-
-#define CR_MUL                                                  \
-    create_object(OPERATOR, OP_TIMES_VAL)
-
-#define CR_ADD                                                  \
-    create_object(OPERATOR, OP_PLUS_VAL)
-
-#define CR_DEL                                                  \
-    create_object(OPERATOR, OP_DEL_VAL)
-    
-#define CR_NUMBER(value)                                        \
-    create_root(create_object(NUMBER, value))
-
-#define CR_EQUAL                                                \
-    create_object(OPERATOR, OP_EQUAL_VAL)
-
-#define CR_STATEMENT(left, right)                               \
-    create_root(CR_EQUAL, left, right);
-
-#define GET_VAL                                                 \
-    start_root->get_data_value()
-
-#define GET_TYPE                                                \
-    start_root->get_data_type()
 
 #define PRINT_L_PART_OF_MUL                                                                                                     \
     if ( IS_ARITHMETIC_FUNCTION(Lroot(start_root))  || IS_NUMBER(Lroot(start_root)) || IS_VARIABLE(Lroot(start_root)) ||        \
@@ -151,6 +125,69 @@ bool is_free_objs = false;
         print_subtree(Rroot(start_root), buffer);                                                                               \
         strcat(buffer, "\\right)");                                                                                             \
     }
+
+
+//------------------------------------------------------------------------------------------------------------
+
+#define dR                                                      \
+    differenciate(Rroot(start_root))
+
+#define dL                                                      \
+    differenciate(Lroot(start_root))
+
+#define copyL                                                   \
+    copy_subtree(Lroot(start_root))
+
+#define copyR                                                   \
+    copy_subtree(Rroot(start_root))
+
+#define copyF                                                   \
+    copy_subtree(start_root)
+
+//------------------------------------------------------------------------------------------------------------
+
+#define ADD_OR_SUB(obj, left, right)                            \
+    create_root(obj, left, right)
+
+#define ADDITION(left, right)                                   \
+    create_root(CR_ADD, left, right)
+
+#define MULTIPLY(left, right)                                   \
+    create_root(CR_MUL, left, right)
+
+#define CR_STATEMENT(left, right)                               \
+    create_root(CR_EQUAL, left, right);
+
+#define CR_NUMBER(value)                                        \
+    create_root(create_object(NUMBER, value))
+
+//------------------------------------------------------------------------------------------------------------
+
+#define CR_LN                                                   \
+    create_object(ARITHMETIC_FUNCTION, LN_VAL)
+
+#define CR_MUL                                                  \
+    create_object(OPERATOR, OP_TIMES_VAL)
+
+#define CR_ADD                                                  \
+    create_object(OPERATOR, OP_PLUS_VAL)
+
+#define CR_DEL                                                  \
+    create_object(OPERATOR, OP_DEL_VAL)
+
+#define CR_EQUAL                                                \
+    create_object(OPERATOR, OP_EQUAL_VAL)
+
+
+//------------------------------------------------------------------------------------------------------------
+
+#define GET_VAL                                                 \
+    start_root->get_data_value()
+
+#define GET_TYPE                                                \
+    start_root->get_data_type()
+
+//------------------------------------------------------------------------------------------------------------
 
 void tree::create_asm_text_file(bool need_debug)
 {
@@ -191,10 +228,10 @@ void tree::get_asm_text_by_lines(tree_element* start_root, char* buffer)
 
     if (objs_->number_of_statements > 2)
     {
-        get_asm_text(Rroot(start_root), buffer);//tree_element* right_subtree = get_statement();
+        get_asm_text(Rroot(start_root), buffer);
         objs_->number_of_statements--;
         
-        strcat(buffer, "\n"); // may be need to add '\n'
+        strcat(buffer, "\n"); 
         
         get_asm_text_by_lines(Lroot(start_root), buffer);
 
@@ -552,7 +589,7 @@ int tree::get_number(tree_element* start_root)
                 case OP_DEL_VAL:
                     return get_number(Lroot(start_root)) / get_number(Rroot(start_root));
                 case OP_POW_VAL:
-                    return pow(get_number(Lroot(start_root)), get_number(Rroot(start_root)));
+                    return static_cast<int>( pow( get_number(Lroot(start_root)), get_number(Rroot(start_root)) ) );
                 default:
                     PRINT_UNDEFINE_OP_VALUE;
             }
@@ -563,6 +600,8 @@ int tree::get_number(tree_element* start_root)
         default:
             PRINT_UNDEFINE_TYPE;
     }
+
+    return -666;
 }
 
 void tree::optimizer_number(tree_element* start_root)
@@ -1272,7 +1311,7 @@ tree_element* tree::differenciate(tree_element* start_root)
                     fprintf(tex_, "В итоге получаем следующим результат:\n");
                     fprintf(tex_, get_formula(derivative));
                     
-                    return EXPONENTIATION(derivative, copyF);
+                    return MULTIPLY(derivative, copyF);
                 }
                 default:
                     PRINT_UNDEFINE_OP_VALUE;
@@ -1752,7 +1791,7 @@ void print_all_elements(tree_element* tmp, FILE* dump, struct Objects* objs)
         fprintf(dump, "\"%p\" -> \"%p\" [label=\"Right\", fontcolor=darkblue]\n\n", tmp, tmp->get_right());
     }
 
-    printf("MAIN TYPE is %d\n", tmp->get_data()->type_of_object);
+    //printf("MAIN TYPE is %d\n", tmp->get_data()->type_of_object);
 
     if ((tmp->get_right() == nullptr) && (tmp->get_left() == nullptr))
     {
@@ -1784,7 +1823,7 @@ void print_all_elements(tree_element* tmp, FILE* dump, struct Objects* objs)
         }
         else
         {
-            printf("HERE type is %d\n", tmp->get_data()->type_of_object);
+            //printf("HERE type is %d\n", tmp->get_data()->type_of_object);
 
             if ((tmp->get_data()->type_of_object == OPERATOR) && (tmp->get_data()->value == OP_TIMES_VAL))
                 fprintf(dump, "\"%p\" [label = \"{<f0> TYPE = [%s] | VALUE = [%s]}| {<f1> left| <here> prev| right} | {<f2> [%p]| [%p]| [%p]}\",style = filled, fillcolor = lightblue] \n", tmp, get_type_of_object(tmp->data_->type_of_object), get_value_of_object(objs, tmp->get_data()), tmp->get_left(), tmp->get_prev(), tmp->get_right());
@@ -1878,8 +1917,6 @@ tree_element* tree::fill_by_lines(tree_element* start_root)
         start_root = create_root(create_object(BINDER, objs_->number_of_statements), left_subtree, right_subtree);
     }
 
-    //printf("start_root = %p\n", start_root);
-
     return start_root;
 }
 
@@ -1913,7 +1950,7 @@ int tree::count_statements()
 {
     int num_of_statements = 0;
 
-    for (int i = 0; i < objs_->number_of_objects; i++)
+    for (size_t i = 0; i < objs_->number_of_objects; i++)
     {
         if (objs_->obj[i].type_of_object == BLOCK_BRACKET)
         {
@@ -1942,7 +1979,7 @@ int tree::count_statements()
     return num_of_statements;
 }
 
-void tree::fill_tree(struct Objects* main_object, bool need_print)
+void tree::fill_tree(struct Objects* main_object, bool need_print, bool beauty_print)
 {
     assert(this && "Nullptr in tree");
     assert(main_object && "nullptr Objects struct");
@@ -1952,20 +1989,23 @@ void tree::fill_tree(struct Objects* main_object, bool need_print)
     int number_of_statements = count_statements();
     objs_->number_of_statements = number_of_statements;
     
-    //printf("statements = %d\n", number_of_statements);
-
     if (number_of_statements == 0)
         printf("0 lines in text.txt\nLeave..\n");
     else if (number_of_statements == 1)
-        root_ = get_statement();        //get_block();//get_statement();
+        root_ = get_statement();      
     else
         root_ = fill_by_lines(root_);
         
-    objs_->number_of_statements = number_of_statements;//objs_->number_of_lines = number_of_lines;
+    objs_->number_of_statements = number_of_statements;
 
     if (need_print)
-        print_tree();//show_tree("start_tree");
-        
+    {
+        if (beauty_print)
+            show_tree();
+        else
+            print_tree();
+    }
+
     is_free_objs = false;
     return;
 }
@@ -2083,6 +2123,7 @@ const char* get_value_of_object(struct Objects* objs, struct Object* obj)
         }
     }
 
+    return "UNINDENTIFIED TYPE ERROR";
 }
 
 tree_element* tree::get_block()
@@ -2092,11 +2133,10 @@ tree_element* tree::get_block()
     if (objs_->obj[cur_size_].type_of_object != BLOCK_BRACKET)
     {
         return get_statement();
-        //cur_size_++; // BECAUSE WE NEED TO take into consideration absence of '{}'
     }
-    else if (!IS_L_B_BRACKET(cur_size_)) //(objs_->obj[cur_size_].value != L_BRACKET_BLOCK_VAL)
+    else if (!IS_L_B_BRACKET(cur_size_))
     {
-        printf("ERROR IN BRACKET. LEave..\n");
+        printf("ERROR IN BRACKET. Leave..\n");
         return nullptr;
     }
     else
@@ -2108,22 +2148,10 @@ tree_element* tree::get_block()
 
         int bracket_counter = 1;
 
-        while (bracket_counter != 0)              
+        while (bracket_counter != 0)
         {
-            /*if (IS_R_B_BRACKET(tmp_cur_size))
-            {
-                printf("-");
-                bracket_counter--;
-            }
-            else if (IS_L_B_BRACKET(tmp_cur_size))
-            {
-                printf("+");
-                bracket_counter++;
-            }*/
-
             if (IS_R_B_BRACKET(tmp_cur_size))
             {
-                //printf("-");
                 bracket_counter--;
             }
             else if (IS_L_B_BRACKET(tmp_cur_size))
@@ -2132,23 +2160,20 @@ tree_element* tree::get_block()
                     tmp_cur_size++;
 
                 true_lines++;
-                //printf("2.statements++ (tmp_cur_size = %d)\n", tmp_cur_size);
             }
 
 
             if ((objs_->obj[tmp_cur_size].type_of_object == END_OF_LINE) && (objs_->obj[tmp_cur_size].value == END_OF_LINE_VAL))
             {
-                //printf("1.statements++ (tmp_cur_size = %d)\n", tmp_cur_size);
                 true_lines++;
             }
             tmp_cur_size++;
 
         }
-        
-        //printf("number of statements = %d\n", true_lines);
+
         int start_number_of_lines = true_lines;
 
-        if (true_lines > 1) 
+        if (true_lines > 1)
         {
             int number_of_lines = true_lines;
 
@@ -2172,9 +2197,14 @@ tree_element* tree::get_block()
             return result;
         }
         else
+        {
             result = get_statement();
- 
+            return result;
+        }
     }
+
+    printf("Error in logic. Line: %d\n", __LINE__);
+    return nullptr;
 }
 
 tree_element* tree::get_logic()
@@ -2247,7 +2277,7 @@ tree_element* tree::get_part_of_logic()
         {
             if (objs_->obj[cur_size_].value == R_BRACKET_VAL)
             {
-                if ((tmp_element->get_left() == nullptr) && (tmp_element->get_right() == nullptr))
+                if (L_AND_R_NULL(tmp_element))
                 {
                     tmp_element = tmp_element_1;
                     return tmp_element;
@@ -2277,7 +2307,7 @@ tree_element* tree::get_part_of_logic()
         }
         else if (objs_->obj[cur_size_].type_of_object == LOGICAL_OPERATOR)
         {
-            if ((tmp_element->get_left() == nullptr) && (tmp_element->get_right() == nullptr))
+            if (L_AND_R_NULL(tmp_element))
             {
                 tmp_element = tmp_element_1;
                 return tmp_element;
@@ -2288,9 +2318,9 @@ tree_element* tree::get_part_of_logic()
             }
         }
 
-        if ((objs_->obj[cur_size_].type_of_object == OPERATOR) && ((objs_->obj[cur_size_].value == OP_MIN_VAL) || (objs_->obj[cur_size_].value == OP_PLUS_VAL)))
+        if (IS_CUR_OBJECT_PLUS_OR_MIN)
         {
-            if ((tmp_element->get_left() != nullptr) && (tmp_element->get_right() != nullptr))
+            if (!L_OR_R_NULL(tmp_element))
             {
                 tree_element* new_tmp_element = new tree_element;
 
@@ -2312,7 +2342,7 @@ tree_element* tree::get_part_of_logic()
                 tmp_element = new_tmp_element;
                 new_tmp_element = swap;
             }
-            else if ((tmp_element->get_left() == nullptr) && (tmp_element->get_right() == nullptr))
+            else if (L_AND_R_NULL(tmp_element))
             {
                 tmp_element->set_data(&(objs_->obj[cur_size_]));
 
@@ -2340,7 +2370,7 @@ tree_element* tree::get_part_of_logic()
         }
 
 
-    } while ((IS_PLUS_OR_MIN()) && !(objs_->obj[cur_size_].type_of_object == END_OF_LINE) && !(IS_LOGIC_OP));
+    } while (IS_CUR_OBJECT_PLUS_OR_MIN && !IS_CUR_OBJECT_LOGIC_OP && !(objs_->obj[cur_size_].type_of_object == END_OF_LINE));
 
     return tmp_element;
 }
@@ -2349,15 +2379,16 @@ tree_element* tree::get_statement()
 {
     tree_element* result = nullptr;
 
-    if ( (objs_->obj[cur_size_].type_of_object == LOGICAL_FUNCTION) && ( (objs_->obj[cur_size_].value == IF_VAL) || (objs_->obj[cur_size_].value == WHILE_VAL) ) )
+    if (IS_CUR_OBJECT_LOGIC_FUNC)
     {
         Object* logic_type = create_object(LOGICAL_FUNCTION, objs_->obj[cur_size_].value);
         cur_size_++;
 
-        tree_element* logic_argument = get_logic();//get_bracket(); // get_logic()
+        tree_element* logic_argument = get_logic();
         
         tree_element* logic_block = nullptr;
-        if ((objs_->obj[cur_size_].type_of_object == BLOCK_BRACKET) && (objs_->obj[cur_size_].value == L_BRACKET_BLOCK_VAL))
+
+        if (IS_CUR_OBJECT_L_BLOCK_BRACKET)
             logic_block = get_block();
         else
         {
@@ -2391,9 +2422,8 @@ tree_element* tree::get_statement()
         tree_element* main_block = get_block();
         tree_element* result = create_root(main_obj, main_arg, main_block);
         return result;
-
     }
-    else if ((objs_->obj[cur_size_].type_of_object == ARITHMETIC_FUNCTION) && (objs_->obj[cur_size_].value == PRINT_VAL))
+    else if ( (objs_->obj[cur_size_].type_of_object == ARITHMETIC_FUNCTION) && (objs_->obj[cur_size_].value == PRINT_VAL) )
     {
         Object* print_obj = create_object(ARITHMETIC_FUNCTION, PRINT_VAL);
         cur_size_++;
@@ -2402,22 +2432,24 @@ tree_element* tree::get_statement()
         result = create_root(print_obj, print_arg);
         return result;
     }
-
-    tree_element* tmp_element_1 = get_number(); //get_expression();
-
-
-    if ((objs_->obj[cur_size_].type_of_object == OPERATOR) && (objs_->obj[cur_size_].value == OP_EQUAL_VAL))
-    {
-        cur_size_++;
-        result = CR_STATEMENT(tmp_element_1, get_expression());
-    }
     else
     {
-        cur_size_++;
-        return tmp_element_1;
-    }
+        tree_element* tmp_element_1 = get_number();
 
-    cur_size_++;
+        if (IS_CUR_OBJECT_EQUAL_OP)
+        {
+            cur_size_++;
+            result = CR_STATEMENT(tmp_element_1, get_expression());
+        }
+        else
+        {
+            cur_size_++;
+            return tmp_element_1;
+        }
+
+        cur_size_++;
+    }
+    
     return result;
 }
 
@@ -2425,7 +2457,7 @@ tree_element* tree::get_expression()
 {
     tree_element* tmp_element_1 = nullptr;
     
-    if ((objs_->obj[cur_size_].type_of_object == OPERATOR) && ((objs_->obj[cur_size_].value == OP_MIN_VAL) || (objs_->obj[cur_size_].value == OP_PLUS_VAL)))
+    if (IS_CUR_OBJECT_PLUS_OR_MIN)
     {
         if (objs_->obj[cur_size_].value == OP_MIN_VAL)
         {
@@ -2435,7 +2467,7 @@ tree_element* tree::get_expression()
         else
         {
             cur_size_++;
-            tmp_element_1 = get_operator(); //ADDITION(get_operator(), get_operator());
+            tmp_element_1 = get_operator();
         }
 
     }
@@ -2484,9 +2516,9 @@ tree_element* tree::get_expression()
         }
 
 
-        if ((objs_->obj[cur_size_].type_of_object == OPERATOR) && ((objs_->obj[cur_size_].value == OP_MIN_VAL) || (objs_->obj[cur_size_].value == OP_PLUS_VAL)))
+        if (IS_CUR_OBJECT_PLUS_OR_MIN)
         {            
-            if ((tmp_element->get_left() != nullptr) && (tmp_element->get_right() != nullptr))
+            if (!L_OR_R_NULL(tmp_element))
             {
                 tree_element* new_tmp_element = new tree_element;
 
@@ -2508,7 +2540,7 @@ tree_element* tree::get_expression()
                 tmp_element = new_tmp_element;
                 new_tmp_element = swap;
             }
-            else if ((tmp_element->get_left() == nullptr) && (tmp_element->get_right() == nullptr))
+            else if (L_AND_R_NULL(tmp_element))
             {
                 tmp_element->set_data(&(objs_->obj[cur_size_]));
 
@@ -2530,13 +2562,13 @@ tree_element* tree::get_expression()
         }
         else
         {
-            printf("NEED cur_size_++, cur_size_ = %d\n", cur_size_);
-            printf("type = %d\nvalue = %d\n", objs_->obj[cur_size_].type_of_object, objs_->obj[cur_size_].value);
+            printf("I HAVE VAN LOGIC(((.Line = %d\n"
+                    "NEED cur_size_++, cur_size_ = %d\n"
+                    "type = %d\nvalue = %d\n", __LINE__, cur_size_, objs_->obj[cur_size_].type_of_object, objs_->obj[cur_size_].value);
             break;
         }
-        
-
-    } while ( (IS_PLUS_OR_MIN()) && !(objs_->obj[cur_size_].type_of_object == END_OF_LINE));
+    } 
+    while (IS_CUR_OBJECT_PLUS_OR_MIN && !IS_CUR_OBJECT_END_OF_LINE);
 
     return tmp_element;
 }
@@ -2651,6 +2683,9 @@ tree_element* tree::get_bracket()
         if (tmp_element == nullptr) // Не выделилась память в get_func
             return nullptr;
     }
+
+    printf("Error in logic. Line: %d\n", __LINE__);
+    return nullptr;
 
 }
 

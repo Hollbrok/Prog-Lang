@@ -5,7 +5,9 @@
 
 int main()
 {
-	bool MY_DEBUG_REGIME = get_config();
+	bool debug_state = false;
+	bool beauty_state = true;
+	get_config(debug_state, beauty_state);
 
 	printf("Hello in my PL!\n");
 
@@ -21,13 +23,13 @@ int main()
 
 	tree PL_tree("PL_TREE");
 
-	PL_tree.fill_tree(objs, MY_DEBUG_REGIME);
+	PL_tree.fill_tree(objs, debug_state, beauty_state);
 
-	PL_tree.create_asm_text_file(MY_DEBUG_REGIME);
+	PL_tree.create_asm_text_file(debug_state);
 
 	printf("DONE!\n");
 	
-	if (MY_DEBUG_REGIME)
+	if (debug_state)
 	{
 		print_objects(objs);
 		system("Pause");

@@ -128,7 +128,7 @@ public:
 	
 	int count_statements();
 
-	void fill_tree(Objects* main_object, bool need_print = false);
+	void fill_tree(Objects* main_object, bool need_print = false, bool beauty_print = true);
 
 	tree_element* get_block();
 
